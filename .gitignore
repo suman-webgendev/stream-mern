@@ -1,0 +1,10 @@
+.vscode
+client/node_modules
+client/.env
+client/dist
+
+
+server/node_modules
+server/.env
+
+node_modules
