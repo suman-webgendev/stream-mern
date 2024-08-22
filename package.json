@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "concurrently \"pnpm run server\" \"pnpm run client\"",
-    "start": "concurrently \"pnpm run server\" \"pnpm run client\"",
+    "dev": "concurrently \"pnpm run server\" \"pnpm run client:dev\"",
+    "start": "concurrently \"pnpm run server\" \"pnpm run client:start\"",
     "server": "cd server && pnpm start",
     "client:dev": "cd client && pnpm dev",
     "client:start": "cd client && pnpm run build && pnpm start"
