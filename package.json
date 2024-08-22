@@ -4,8 +4,10 @@
   "description": "",
   "scripts": {
     "dev": "concurrently \"pnpm run server\" \"pnpm run client\"",
-    "server": "cd server && pnpm dev",
-    "client": "cd client && pnpm dev"
+    "start": "concurrently \"pnpm run server\" \"pnpm run client\"",
+    "server": "cd server && pnpm start",
+    "client:dev": "cd client && pnpm dev",
+    "client:start": "cd client && pnpm run build && pnpm start"
   },
   "keywords": [],
   "author": "",
