@@ -63,18 +63,22 @@ export const login = async (req, res) => {
     if (user.authentication.password !== expectedHash)
       return res.status(403).json({ message: "Password mismatch!" });
 
-    const token = jwt.sign({ userId: user._id }, process.env.AUTH_SECRET, {
-      expiresIn: "24h",
-    });
+    const token = jwt.sign(
+      { userId: user._id, username: user.name },
+      process.env.AUTH_SECRET,
+      {
+        expiresIn: "24h",
+      }
+    );
 
     user.authentication.sessionToken = token;
     await user.save();
 
     res.cookie("stream_auth", token, {
-      domain: "localhost",
-      path: "/",
-      httpOnly: true,
-      sameSite: "strict",
+      // domain: "localhost",
+      // path: "/",
+      // httpOnly: true,
+      // sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV === "production",
     });

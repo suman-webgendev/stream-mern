@@ -42,6 +42,7 @@ const LoginForm = () => {
     },
     onSuccess: () => {
       navigate("/");
+      navigate(0);
     },
   });
 

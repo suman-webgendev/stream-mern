@@ -1,20 +1,25 @@
+import { getCookie } from "@/lib/utils";
 import { jwtDecode } from "jwt-decode";
-import { createContext, useEffect, useState } from "react";
-import { getCookie } from "../../lib/utils";
+import { createContext, useLayoutEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState({
+    username: "",
+    userId: "",
+  });
 
-  useEffect(() => {
-    const token = getCookie("stream_auth");
-    console.log(token);
+  useLayoutEffect(() => {
+    const token = getCookie();
     if (token) {
       const decoded = jwtDecode(token);
       setIsAuthenticated(true);
-      setUser(decoded.userId);
+      setUser({
+        userId: decoded.userId,
+        username: decoded.username,
+      });
     }
   }, [setIsAuthenticated]);
 

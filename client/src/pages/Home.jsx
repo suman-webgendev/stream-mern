@@ -11,7 +11,6 @@ const Home = () => {
     queryKey: ["VideoList"],
     queryFn: async () => {
       const res = await api.get("/video");
-      console.log(res);
       if (res.status !== 200) {
         throw new Error("Failed to fetch videos!");
       }
@@ -19,12 +18,10 @@ const Home = () => {
     },
   });
 
-  console.log("video-list error", error);
-
   return (
-    <div className="flex h-full flex-col items-center justify-center p-24">
+    <div>
       {isFetching && <div>Loading videos</div>}
-      {videos && <VideoList videos={videos} />}
+      {!isFetching && !error && videos && <VideoList videos={videos} />}
     </div>
   );
 };

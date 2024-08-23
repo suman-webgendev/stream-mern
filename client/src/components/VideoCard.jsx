@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import { Link } from "react-router-dom";
 
 const VideoCard = (props) => {
-  console.log(props);
   const formatDate = useCallback((uploadDate) => {
     const dateFormat = new Date(uploadDate);
     const now = new Date();
@@ -39,7 +38,7 @@ const VideoCard = (props) => {
     <Link to={`/${props.videoId}`}>
       <Card>
         <CardContent className="grid-cols-video grid content-center gap-1 self-center border-none p-1">
-          <div className="my-auto h-32 w-64">
+          <div className="my-auto h-48 w-64">
             <img
               src={`/thumbnails/${props.videoTitle}_thumbnail.jpg`}
               alt="video thumbnail"
@@ -50,7 +49,9 @@ const VideoCard = (props) => {
             />
           </div>
           <div className="overflow-x grid h-32 w-full max-w-screen-md grid-rows-3 space-y-1">
-            <p className="row-span-2 break-all text-lg">{props.videoTitle}</p>
+            <p className="row-span-2 text-pretty break-all text-lg">
+              {props.videoTitle}
+            </p>
             <p className="row-span-1 text-muted-foreground">
               {formatDate(props.uploadedAt)}
             </p>
