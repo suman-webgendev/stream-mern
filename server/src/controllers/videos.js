@@ -29,7 +29,6 @@ export const getVideo = async (req, res) => {
     }
 
     const video = await getVideoById(id);
-    console.log(video);
 
     if (!video)
       return res.status(404).json({ message: "Video does not exist!" });

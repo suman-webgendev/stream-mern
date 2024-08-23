@@ -5,6 +5,7 @@ const { merge } = pkg;
 export const isAuthenticated = async (req, res, next) => {
   try {
     const sessionToken = req.cookies["stream_auth"];
+
     if (!sessionToken)
       return res
         .status(401)

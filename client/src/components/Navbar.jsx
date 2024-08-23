@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 
 const Navbar = () => {
   return (
-    <nav className="flex h-[8vh] items-center justify-between bg-[rgba(0,0,0,.5)] px-6 dark:bg-white/20">
+    <nav className="sticky left-0 right-0 top-0 flex h-[8vh] items-center justify-between bg-[rgba(0,0,0,.5)] px-6 dark:bg-white/20">
       <div>
         <img src="/logo.svg" alt="logo" />
       </div>

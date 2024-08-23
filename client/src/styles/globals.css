@@ -79,4 +79,8 @@
     font-display: swap;
     src: url(/fonts/Poppins.ttf) format('ttf');
   }
+
+  .videoBtn {
+    @apply transition-opacity opacity-85 hover:opacity-100 cursor-pointer bg-none border-none text-inherit p-0 size-8 text-[1.1rem];
+  }
 }

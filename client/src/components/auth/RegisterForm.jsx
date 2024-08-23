@@ -1,7 +1,7 @@
-
-import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import CardWrapper from "@/components/auth/CardWrapper";
+import FormError from "@/components/auth/FormError";
+import FormSuccess from "@/components/auth/FormSuccess";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,22 +10,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import * as z from "zod";
-import { registerSchema } from "@/schemas";
-import CardWrapper from "@/components/auth/CardWrapper";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { api } from "@/lib/utils";
+import { registerSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
-import FormError from "@/components/auth/FormError";
-import FormSuccess from "@/components/auth/FormSuccess";
-import {register} from "@/actions/register"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [isPending, startTransition] = useTransition();
-
   const form = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -35,20 +30,28 @@ const RegisterForm = () => {
     },
   });
 
-  const onSubmit = (values) => {
-    setError("")
-    setSuccess("")
-    startTransition(()=> {
-      register(values)
-    })
-  }
+  const {
+    mutateAsync: register,
+    data,
+    isError,
+    error,
+    isPending,
+  } = useMutation({
+    mutationFn: async (values) => {
+      const response = await api.post("/auth/register", values);
+      return response.data;
+    },
+  });
+
+  const onSubmit = async (values) => {
+    await register(values);
+  };
 
   return (
     <CardWrapper
       headerLabel="Create an account"
       backButtonLabel="Already have an account?"
-      showSocial
-      backButtonHref="/auth/login"
+      backButtonHref="/login"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -121,8 +124,13 @@ const RegisterForm = () => {
               )}
             />
           </div>
-          <FormError message={error} />
-          <FormSuccess message={success} />
+          {isError && (
+            <FormError
+              message={error?.response?.data?.message || "An error occurred"}
+            />
+          )}
+
+          {data && <FormSuccess message={data?.message} />}
           <Button
             disabled={isPending}
             type="submit"
@@ -138,4 +146,3 @@ const RegisterForm = () => {
 };
 
 export default RegisterForm;
-

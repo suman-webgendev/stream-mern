@@ -1,10 +1,11 @@
-
-import React, { ReactNode } from "react";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import AuthHeader from "./AuthHeader";
 import BackButton from "./BackButton";
-
-
 
 const CardWrapper = (props) => {
   return (
@@ -24,4 +25,3 @@ const CardWrapper = (props) => {
 };
 
 export default CardWrapper;
-

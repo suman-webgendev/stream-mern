@@ -1,4 +1,5 @@
 import "@/styles/errorPage.css";
+
 const ErrorPage = () => {
   return (
     <div id="main">
