@@ -118,11 +118,13 @@ export const logout = async (req, res) => {
 
 export const authCheck = async (req, res) => {
   try {
-    const sessionToken = req.cookies["stream_auth"];
+    const token = req.cookies["stream_auth"];
 
-    if (!sessionToken) return res.status(200).json({ authenticated: false });
+    if (!token) return res.status(200).json({ authenticated: false });
 
-    const existingUser = await getUserBySessionToken(sessionToken);
+    jwt.verify(token, process.env.AUTH_SECRET);
+
+    const existingUser = await getUserBySessionToken(token);
 
     if (!existingUser) return res.status(200).json({ authenticated: false });
 

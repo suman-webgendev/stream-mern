@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/card";
 import AuthHeader from "./AuthHeader";
 import BackButton from "./BackButton";
+import Social from "./Social";
 
 const CardWrapper = (props) => {
   return (
@@ -14,6 +15,11 @@ const CardWrapper = (props) => {
         <AuthHeader label={props.headerLabel} />
       </CardHeader>
       <CardContent>{props.children}</CardContent>
+      {props.showSocial && (
+        <CardFooter>
+          <Social />
+        </CardFooter>
+      )}
       <CardFooter>
         <BackButton
           label={props.backButtonLabel}

@@ -18,3 +18,25 @@ export const deleteUserById = (id) => UserModel.findOneAndDelete({ _id: id });
 
 export const updateUserById = (id, values) =>
   UserModel.findByIdAndUpdate(id, values);
+
+export const updateUserSessionToken = async (userId, newToken) => {
+  try {
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        "authentication.sessionToken": newToken,
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    return updatedUser;
+  } catch (error) {
+    console.error("Error updating user session token:", error);
+    throw error;
+  }
+};

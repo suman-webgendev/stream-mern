@@ -1,6 +1,6 @@
 import { VideoModel } from "../db/videos.js";
 
-export const getVideos = () => VideoModel.find();
+export const getVideos = () => VideoModel.find().sort([["createdAt", -1]]);
 
 export const getVideoById = (id) => VideoModel.findById(id);
 

@@ -6,26 +6,29 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const { data, isLoading: queryLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["authCheck"],
     queryFn: async () => {
       const response = await api.get("/auth/check");
       return response.data;
     },
+    refetchInterval: 5 * 60 * 1000,
   });
 
   useEffect(() => {
-    if (!queryLoading) {
+    if (!isLoading) {
       setIsAuthenticated(data?.authenticated === true);
-      setIsLoading(false);
     }
-  }, [data, queryLoading]);
+    if (error) {
+      console.error("Auth check error:", error);
+      setIsAuthenticated(false);
+    }
+  }, [data, isLoading, error]);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, setIsAuthenticated, isLoading }}
+      value={{ isAuthenticated, setIsAuthenticated, isLoading, error }}
     >
       {children}
     </AuthContext.Provider>

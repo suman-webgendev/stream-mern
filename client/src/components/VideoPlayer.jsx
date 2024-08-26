@@ -2,9 +2,7 @@ import { cn, formatDuration } from "@/lib/utils";
 import "@/styles/videoPlayer.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useParams } from "react-router-dom";
-
-const VideoPlayer = () => {
+const VideoPlayer = (props) => {
   const [isPaused, setIsPaused] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
@@ -17,7 +15,7 @@ const VideoPlayer = () => {
   const videoRef = useRef(null);
   const videoContainerRef = useRef(null);
   const timelineContainerRef = useRef(null);
-  const params = useParams();
+
   const handlePlayPause = useCallback(() => {
     const video = videoRef.current;
     if (video) {
@@ -362,7 +360,7 @@ const VideoPlayer = () => {
         aria-label="Video player"
         className="w-full"
       >
-        <source src={`http://localhost:8080/video/${params.id}`} />
+        <source src={`http://localhost:8080/video/${props.videoId}`} />
         Your browser does not support the video tag.
       </video>
     </div>
