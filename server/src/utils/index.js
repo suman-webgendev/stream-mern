@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
+import sharp from "sharp";
 
 dotenv.config();
 
@@ -31,15 +32,56 @@ export const storage = multer.diskStorage({
   },
 });
 
-export const generateThumbnail = (videoPath, thumbnailPath) => {
+export const generateThumbnail = async (videoPath, thumbnailPath) => {
+  try {
+    const tempThumbnailPath = `${thumbnailPath}.temp.png`;
+    await new Promise((resolve, reject) => {
+      const command = `ffmpeg -i ${videoPath} -ss 00:00:02.000 -vframes 1 ${tempThumbnailPath}`;
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error("[generateThumbnail] FFmpeg error:", error);
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    await sharp(tempThumbnailPath)
+      .resize(256, 128, {
+        fit: "cover",
+        position: "center",
+      })
+      .webp({ quality: 70 })
+      .toFile(thumbnailPath);
+
+    await new Promise((resolve, reject) => {
+      fs.unlink(tempThumbnailPath, (err) => {
+        if (err) {
+          console.error("[generateThumbnail] Error deleting temp file:", err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    return thumbnailPath;
+  } catch (error) {
+    console.error("[generateThumbnail] Error:", error);
+    throw error;
+  }
+};
+
+export const readImageFile = (imagePath) => {
   return new Promise((resolve, reject) => {
-    const command = `ffmpeg -i ${videoPath} -ss 00:00:02.000 -vframes 1 ${thumbnailPath}`;
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error("[generateThumbnail]", error);
-        reject(error);
+    fs.readFile(imagePath, (err, data) => {
+      if (err) {
+        console.error("[readImageFile]", err);
+        reject(err);
       } else {
-        resolve(thumbnailPath);
+        const base64Image = Buffer.from(data).toString("base64");
+        resolve(`data:image/webp;base64,${base64Image}`);
       }
     });
   });

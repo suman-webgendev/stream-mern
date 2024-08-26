@@ -1,18 +1,84 @@
 import fs from "fs";
 import mongoose from "mongoose";
 import multer from "multer";
+import { promisify } from "util";
 import { createVideo, getVideoById, getVideos } from "../actions/videos.js";
-import { VideoModel } from "../db/videos.js";
-import { generateThumbnail, storage } from "../utils/index.js";
+import { generateThumbnail, readImageFile, storage } from "../utils/index.js";
 
 const upload = multer({ storage: storage });
+
+export const uploadVideo = async (req, res) => {
+  const uploadSingle = promisify(upload.single("video"));
+
+  try {
+    await uploadSingle(req, res);
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded!" });
+    }
+
+    const { title } = req.body;
+    if (!title) {
+      return res.status(400).json({ message: "Title is required!" });
+    }
+
+    const videoPath = req.file.path;
+    const thumbnailPath = `public/thumbnails/${Date.now()}_thumbnail.webp`;
+
+    await generateThumbnail(videoPath, thumbnailPath);
+
+    const videoData = {
+      title,
+      path: videoPath,
+      imageUrl: thumbnailPath,
+    };
+
+    const savedVideo = await createVideo(videoData);
+
+    return res.status(200).json({
+      message: "Video uploaded and saved successfully!",
+      video: savedVideo,
+    });
+  } catch (error) {
+    console.error("[uploadVideo]", error);
+
+    if (error instanceof multer.MulterError) {
+      return res
+        .status(500)
+        .json({ message: "Multer error occurred during upload!" });
+    }
+
+    if (error.message === "THUMBNAIL_GENERATION_FAILED") {
+      return res.status(500).json({
+        message: "Video uploaded but failed to generate thumbnail!",
+      });
+    }
+
+    return res.status(500).json({ message: "Something went wrong!" });
+  }
+};
 
 export const getAllVideos = async (req, res) => {
   try {
     const videos = await getVideos();
-    return res.status(200).json(videos);
+
+    const videosWithImages = await Promise.all(
+      videos.map(async (video) => {
+        const imageData = await readImageFile(video.imageUrl);
+
+        return {
+          id: video._id,
+          title: video.title,
+          imageUrl: imageData,
+          createdAt: video.createdAt,
+          updatedAt: video.updatedAt,
+        };
+      })
+    );
+
+    return res.status(200).json(videosWithImages);
   } catch (error) {
-    console.error("[getAllUser]", error);
+    console.error("[getAllVideos]", error);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };
@@ -60,67 +126,6 @@ export const getVideo = async (req, res) => {
     return;
   } catch (error) {
     console.error("[getVideo]", error);
-    return res.status(500).json({ message: "Something went wrong!" });
-  }
-};
-
-export const uploadVideo = async (req, res) => {
-  try {
-    upload.single("video")(req, res, async (err) => {
-      if (err instanceof multer.MulterError) {
-        console.error("[uploadVideo]", err);
-        return res
-          .status(500)
-          .json({ message: "Multer error occurred during upload!" });
-      } else if (err) {
-        console.error("[uploadVideo]", err);
-        return res
-          .status(500)
-          .json({ message: "Unknown error occurred during upload!" });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded!" });
-      }
-
-      const { title } = req.body;
-      if (!title) {
-        return res.status(400).json({ message: "Title is required!" });
-      }
-
-      const videoPath = req.file.path;
-
-      const videoData = {
-        title,
-        path: videoPath,
-      };
-
-      const savedVideo = await createVideo(videoData);
-
-      const thumbnailPath = `public/thumbnails/${savedVideo._id}_thumbnail.webp`;
-
-      try {
-        await generateThumbnail(videoPath, thumbnailPath);
-
-        const updatedVideo = await VideoModel.findByIdAndUpdate(
-          savedVideo._id,
-          { imageUrl: thumbnailPath },
-          { new: true }
-        );
-
-        return res.status(200).json({
-          message: "Video uploaded and saved successfully!",
-          video: updatedVideo,
-        });
-      } catch (thumbnailError) {
-        console.error("[generateThumbnail]", thumbnailError);
-        return res.status(500).json({
-          message: "Video uploaded but failed to generate thumbnail!",
-        });
-      }
-    });
-  } catch (error) {
-    console.error("[uploadVideo]", error);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };

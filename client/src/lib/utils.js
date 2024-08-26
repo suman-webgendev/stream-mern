@@ -26,3 +26,33 @@ export const formatDuration = (time) => {
     )}:${leadingZeroFormatter.format(sec)}`;
   }
 };
+
+export const formatDate = (uploadDate) => {
+  const dateFormat = new Date(uploadDate);
+  const now = new Date();
+  const years = now.getFullYear() - dateFormat.getFullYear();
+  const months = now.getMonth() - dateFormat.getMonth() + years * 12;
+  const days = Math.floor(
+    (now.getTime() - dateFormat.getTime()) / (1000 * 60 * 60 * 24),
+  );
+  const hours =
+    Math.floor((now.getTime() - dateFormat.getTime()) / (1000 * 60 * 60)) % 24;
+  const minutes =
+    Math.floor((now.getTime() - dateFormat.getTime()) / (1000 * 60)) % 60;
+  const seconds =
+    Math.floor((now.getTime() - dateFormat.getTime()) / 1000) % 60;
+
+  if (years > 1) {
+    return `${years} years ago`;
+  } else if (months > 1) {
+    return `${months} months ago`;
+  } else if (days > 1) {
+    return `${days} days ago`;
+  } else if (hours > 1) {
+    return `${hours} hours ago`;
+  } else if (minutes > 1) {
+    return `${minutes} minutes ago`;
+  } else {
+    return `${seconds} seconds ago`;
+  }
+};

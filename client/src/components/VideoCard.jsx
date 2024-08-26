@@ -1,43 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useCallback } from "react";
+import { formatDate } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
 const VideoCard = (props) => {
-  const formatDate = useCallback((uploadDate) => {
-    const dateFormat = new Date(uploadDate);
-    const now = new Date();
-    const years = now.getFullYear() - dateFormat.getFullYear();
-    const months = now.getMonth() - dateFormat.getMonth() + years * 12;
-    const days = Math.floor(
-      (now.getTime() - dateFormat.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    const hours =
-      Math.floor((now.getTime() - dateFormat.getTime()) / (1000 * 60 * 60)) %
-      24;
-    const minutes =
-      Math.floor((now.getTime() - dateFormat.getTime()) / (1000 * 60)) % 60;
-    const seconds =
-      Math.floor((now.getTime() - dateFormat.getTime()) / 1000) % 60;
-
-    if (years > 1) {
-      return `${years} years ago`;
-    } else if (months > 1) {
-      return `${months} months ago`;
-    } else if (days > 1) {
-      return `${days} days ago`;
-    } else if (hours > 1) {
-      return `${hours} hours ago`;
-    } else if (minutes > 1) {
-      return `${minutes} minutes ago`;
-    } else {
-      return `${seconds} seconds ago`;
-    }
-  }, []);
-
   return (
     <Link to={`/${props.videoId}`}>
       <Card>
-        <CardContent className="grid-cols-video grid content-center gap-1 self-center border-none p-1">
+        <CardContent className="grid grid-cols-video content-center gap-1 self-center border-none p-1">
           <div className="my-auto h-48 w-64">
             <img
               src={`/thumbnails/${props.videoTitle}_thumbnail.jpg`}
