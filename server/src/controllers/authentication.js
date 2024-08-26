@@ -75,10 +75,10 @@ export const login = async (req, res) => {
     await user.save();
 
     res.cookie("stream_auth", token, {
-      // domain: "localhost",
-      // path: "/",
-      // httpOnly: true,
-      // sameSite: "strict",
+      domain: "localhost",
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV === "production",
     });
@@ -113,5 +113,21 @@ export const logout = async (req, res) => {
     return res
       .status(500)
       .json({ message: "An error occurred during logout." });
+  }
+};
+
+export const authCheck = async (req, res) => {
+  try {
+    const sessionToken = req.cookies["stream_auth"];
+
+    if (!sessionToken) return res.status(200).json({ authenticated: false });
+
+    const existingUser = await getUserBySessionToken(sessionToken);
+
+    if (!existingUser) return res.status(200).json({ authenticated: false });
+
+    return res.status(200).json({ authenticated: true });
+  } catch (error) {
+    res.status(401).json({ authenticated: false });
   }
 };

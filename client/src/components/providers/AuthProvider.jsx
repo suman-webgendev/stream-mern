@@ -1,31 +1,33 @@
-import { getCookie } from "@/lib/utils";
-import { jwtDecode } from "jwt-decode";
-import { createContext, useLayoutEffect, useState } from "react";
+import { api } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState({
-    username: "",
-    userId: "",
+  const [isLoading, setIsLoading] = useState(true);
+
+  const { data, isLoading: queryLoading } = useQuery({
+    queryKey: ["authCheck"],
+    queryFn: async () => {
+      const response = await api.get("/auth/check");
+      return response.data;
+    },
   });
 
-  useLayoutEffect(() => {
-    const token = getCookie();
-    if (token) {
-      const decoded = jwtDecode(token);
-      setIsAuthenticated(true);
-      setUser({
-        userId: decoded.userId,
-        username: decoded.username,
-      });
+  useEffect(() => {
+    if (!queryLoading) {
+      setIsAuthenticated(data?.authenticated === true);
+      setIsLoading(false);
     }
-  }, [setIsAuthenticated]);
+  }, [data, queryLoading]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, setIsAuthenticated, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
-}
+};

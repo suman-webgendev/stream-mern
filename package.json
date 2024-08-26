@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "server": "cd server && pnpm start",
+    "server:clear": "cd server && rm -rf node_modules",
+    "client:dev": "cd client && pnpm dev",
+    "client:start": "cd client && pnpm run build && pnpm start",
+    "client:clear": "cd client && rm -rf node_modules",
     "dev": "concurrently \"pnpm run server\" \"pnpm run client:dev\"",
     "start": "concurrently \"pnpm run server\" \"pnpm run client:start\"",
-    "server": "cd server && pnpm start",
-    "client:dev": "cd client && pnpm dev",
-    "client:start": "cd client && pnpm run build && pnpm start"
+    "clear": "concurrently \"pnpm run server:clear\" \"pnpm run client:clear\""
   },
   "keywords": [],
   "author": "",

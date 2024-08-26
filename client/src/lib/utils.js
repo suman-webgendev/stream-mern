@@ -1,6 +1,5 @@
 import axios from "axios";
 import { clsx } from "clsx";
-import Cookies from "js-cookie";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs) {
@@ -11,10 +10,6 @@ export const api = axios.create({
   baseURL: "http://localhost:8080",
   withCredentials: true,
 });
-
-export const getCookie = () => {
-  return Cookies.get("stream_auth");
-};
 
 export const formatDuration = (time) => {
   const leadingZeroFormatter = new Intl.NumberFormat(undefined, {

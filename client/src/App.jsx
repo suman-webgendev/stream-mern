@@ -1,3 +1,4 @@
+import PrivateRoute from "@/components/auth/PrivateRoute";
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout";
 import Login from "@/pages/Login";
@@ -9,11 +10,16 @@ const App = () => {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="/:id" element={<VideoPage />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+        {/* Public Routes */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Private Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="/:id" element={<VideoPage />} />
+          </Route>
         </Route>
       </Routes>
     </div>
