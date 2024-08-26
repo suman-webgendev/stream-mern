@@ -6,9 +6,14 @@ import dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
 import router from "./router/index.js";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = Number(process.env.PORT) || 8080;
@@ -23,6 +28,10 @@ app.use(
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+app.set("view engine", "ejs");
+
+app.set("views", path.join(__dirname, "views"));
 
 const server = http.createServer(app);
 
