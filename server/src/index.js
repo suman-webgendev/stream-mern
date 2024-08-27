@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import session from "express-session";
 import http from "http";
 import mongoose from "mongoose";
 import path from "path";
@@ -25,6 +26,14 @@ app.use(
   })
 );
 
+app.use(
+  session({
+    secret: process.env.AUTH_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -32,6 +41,10 @@ app.use(bodyParser.json());
 app.set("view engine", "ejs");
 
 app.set("views", path.join(__dirname, "views"));
+
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 const server = http.createServer(app);
 
