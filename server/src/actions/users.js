@@ -1,6 +1,6 @@
 import { UserModel } from "../db/users.js";
 
-export const getUsers = () => UserModel.find();
+export const getUsers = () => UserModel.find().sort([["createdAt", -1]]);
 
 export const getUserById = (id) => UserModel.findById(id);
 

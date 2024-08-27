@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles/login.css" />
+    <script src="/scripts/login.js" defer></script>
+    <title><%= title %> | Streaming</title>
+  </head>
+  <body>
+    <main>
+      <div class="login-box">
+        <p class="header-text">Welcome back</p>
+        <% if (error) { %>
+        <p class="error-message"><%= error %></p>
+        <% } %>
+        <form class="form" action="/admin/login" method="POST">
+          <div class="user-box">
+            <input required name="email" type="email" />
+            <label>Email</label>
+          </div>
+          <div class="user-box">
+            <input required name="password" type="password" />
+            <label>Password</label>
+          </div>
+          <button class="login-button" type="submit">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Login
+          </button>
+        </form>
+      </div>
+    </main>
+  </body>
+</html>
