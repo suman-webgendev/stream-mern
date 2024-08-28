@@ -1,0 +1,12 @@
+.image-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 6rem;
+}
+
+img {
+  width: 10rem;
+  height: 6rem;
+  object-fit: cover;
+}

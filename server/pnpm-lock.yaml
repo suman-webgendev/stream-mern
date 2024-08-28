@@ -32,6 +32,9 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.19.2
+      express-fileupload:
+        specifier: ^1.5.1
+        version: 1.5.1
       express-session:
         specifier: ^1.18.0
         version: 1.18.0
@@ -391,6 +394,10 @@ packages:
   etag@1.8.1:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
+
+  express-fileupload@1.5.1:
+    resolution: {integrity: sha512-LsYG1ALXEB7vlmjuSw8ABeOctMp8a31aUC5ZF55zuz7O2jLFnmJYrCv10py357ky48aEoBQ/9bVXgFynjvaPmA==}
+    engines: {node: '>=12.0.0'}
 
   express-session@1.18.0:
     resolution: {integrity: sha512-m93QLWr0ju+rOwApSsyso838LQwgfs44QtOP/WBiwtAgPIo/SAh1a5c6nn2BR6mFNZehTpqKDESzP+fRHVbxwQ==}
@@ -1175,6 +1182,10 @@ snapshots:
   escape-html@1.0.3: {}
 
   etag@1.8.1: {}
+
+  express-fileupload@1.5.1:
+    dependencies:
+      busboy: 1.6.0
 
   express-session@1.18.0:
     dependencies:
