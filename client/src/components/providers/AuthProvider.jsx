@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["authCheck"],
     queryFn: async () => {
-      const response = await api.get("/auth/check");
+      const response = await api.get("/api/auth/check");
       return response.data;
     },
     refetchInterval: 5 * 60 * 1000,

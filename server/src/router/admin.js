@@ -1,4 +1,5 @@
 import {
+  adminLogout,
   dashboard,
   displayAddUser,
   displayUploadVideo,
@@ -7,13 +8,15 @@ import {
   users,
   videos,
 } from "../controllers/admin.js";
+import { isAuthenticatedAdmin } from "../middlewares/admin.js";
 
 export default (router) => {
-  router.get("/admin/login", renderLoginPage);
-  router.post("/admin/login", handleLogin);
-  router.get("/admin/dashboard", dashboard);
-  router.get("/admin/users", users);
-  router.get("/admin/videos", videos);
-  router.get("/admin/video/upload", displayUploadVideo);
-  router.get("/admin/user/create", displayAddUser);
+  router.get("/", renderLoginPage);
+  router.post("/", handleLogin);
+  router.get("/dashboard", isAuthenticatedAdmin, dashboard);
+  router.get("/users", isAuthenticatedAdmin, users);
+  router.get("/videos", isAuthenticatedAdmin, videos);
+  router.get("/video/upload", isAuthenticatedAdmin, displayUploadVideo);
+  router.get("/user/create", isAuthenticatedAdmin, displayAddUser);
+  router.post("/logout", isAuthenticatedAdmin, adminLogout);
 };

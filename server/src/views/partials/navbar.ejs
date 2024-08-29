@@ -21,7 +21,7 @@
           <a
             class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>"
             aria-current="page"
-            href="/admin/dashboard"
+            href="/dashboard"
             >Dashboard</a
           >
         </li>
@@ -29,7 +29,7 @@
         <li class="nav-item">
           <a
             class="nav-link <%= currentPage === 'users' ? 'active' : '' %>"
-            href="/admin/users"
+            href="/users"
             >Users</a
           >
         </li>
@@ -37,14 +37,47 @@
         <li class="nav-item">
           <a
             class="nav-link <%= currentPage === 'videos' ? 'active' : '' %>"
-            href="/admin/videos"
+            href="/videos"
             >Videos</a
           >
         </li>
       </ul>
-      <form class="d-flex">
-        <button class="btn btn-outline-danger" type="submit">Logout</button>
+      <form class="d-flex" method="post" action="/logout">
+        <button id="logoutButton" class="btn btn-outline-danger">Logout</button>
       </form>
     </div>
   </div>
 </nav>
+
+<script defer>
+  document.addEventListener("DOMContentLoaded", function () {
+    const logoutButton = document.getElementById("logoutButton");
+
+    if (logoutButton) {
+      logoutButton.addEventListener("click", async function (event) {
+        event.preventDefault();
+
+        if (confirm("Are you sure you want to log out?")) {
+          try {
+            const response = await fetch("http://localhost:8080/logout", {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+
+            if (response.ok) {
+              window.location.href = "/";
+            } else {
+              alert("Logout failed. Please try again.");
+            }
+          } catch (error) {
+            console.error("Error logging out:", error);
+            alert("An error occurred. Please try again.");
+          }
+        }
+      });
+    }
+  });
+</script>

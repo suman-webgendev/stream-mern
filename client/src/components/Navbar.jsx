@@ -12,7 +12,7 @@ const Navbar = () => {
 
   const { mutateAsync: logOut, isPending } = useMutation({
     mutationFn: async () => {
-      const response = await api.post("/auth/logout");
+      const response = await api.post("/api/auth/logout");
       return response.data;
     },
     onSuccess: () => {
@@ -27,7 +27,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky left-0 right-0 top-0 flex h-[8vh] items-center justify-between bg-[rgba(0,0,0,.5)] px-6 dark:bg-white/20">
+    <nav className="sticky left-0 right-0 top-0 z-[1000] flex h-[8vh] items-center justify-between bg-[rgba(0,0,0,.5)] px-6 dark:bg-white/20">
       <div>
         <img src="/logo.svg" alt="logo" />
       </div>

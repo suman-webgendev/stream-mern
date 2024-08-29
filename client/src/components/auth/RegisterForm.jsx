@@ -38,7 +38,7 @@ const RegisterForm = () => {
     isPending,
   } = useMutation({
     mutationFn: async (values) => {
-      const response = await api.post("/auth/register", values);
+      const response = await api.post("/api/auth/register", values);
       return response.data;
     },
   });

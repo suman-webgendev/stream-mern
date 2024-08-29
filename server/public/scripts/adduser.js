@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
       password: formData.get("password"),
     };
 
-    fetch("/auth/register", {
+    fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -4,10 +4,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import session from "express-session";
 import http from "http";
 import mongoose from "mongoose";
 import path from "path";
+import { Server } from "socket.io";
 import { fileURLToPath } from "url";
 import router from "./router/index.js";
 
@@ -22,15 +22,7 @@ const port = Number(process.env.PORT) || 8080;
 app.use(
   cors({
     credentials: true,
-    origin: [process.env.CLIENT_URL],
-  })
-);
-
-app.use(
-  session({
-    secret: process.env.AUTH_SECRET,
-    resave: false,
-    saveUninitialized: true,
+    origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
   })
 );
 
@@ -44,12 +36,18 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
 const server = http.createServer(app);
+const io = new Server(server);
 
 mongoose.Promise = Promise;
 mongoose.connect(process.env.DATABASE_URL);
+
+const chatNamespace = io.of("/chat");
+
+chatNamespace.on("connection", (socket) => {
+  console.log("a user connected");
+});
 
 mongoose.connection.on("error", (error) => {
   console.error("Database connection error:", error);

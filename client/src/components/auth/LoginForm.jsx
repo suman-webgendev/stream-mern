@@ -37,7 +37,7 @@ const LoginForm = () => {
     isPending,
   } = useMutation({
     mutationFn: async (values) => {
-      const response = await api.post("/auth/login", values);
+      const response = await api.post("/api/auth/login", values);
       return response.data;
     },
     onSuccess: () => {

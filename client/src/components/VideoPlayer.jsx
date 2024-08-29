@@ -360,7 +360,7 @@ const VideoPlayer = (props) => {
         aria-label="Video player"
         className="w-full"
       >
-        <source src={`http://localhost:8080/video/${props.videoId}`} />
+        <source src={`http://localhost:8080/api/video/${props.videoId}`} />
         Your browser does not support the video tag.
       </video>
     </div>

@@ -9,7 +9,7 @@ document.getElementById("uploadForm").addEventListener("submit", function (e) {
   loader.style.display = "flex";
   messageBoxContainer.style.display = "none";
 
-  fetch("/videos/upload", {
+  fetch("/api/videos/upload", {
     method: "POST",
     body: formData,
   })

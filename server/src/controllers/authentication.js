@@ -1,10 +1,6 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import {
-  createUser,
-  getUserByEmail,
-  getUserBySessionToken,
-} from "../actions/users.js";
+import { getUserByEmail, getUserBySessionToken } from "../actions/users.js";
 import { authentication, random } from "../utils/index.js";
 
 dotenv.config();
@@ -75,8 +71,6 @@ export const login = async (req, res) => {
     await user.save();
 
     res.cookie("stream_auth", token, {
-      domain: "localhost",
-      path: "/",
       httpOnly: true,
       sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000,
@@ -105,7 +99,12 @@ export const logout = async (req, res) => {
       user.authentication.sessionToken = null;
       await user.save();
     }
-    res.clearCookie("stream_auth");
+    res.clearCookie("stream_auth", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+    });
 
     return res.status(200).json({ message: "Successfully logged out." });
   } catch (error) {
