@@ -5,13 +5,70 @@ import { promisify } from "util";
 import { createVideo, getVideoById, getVideos } from "../actions/videos.js";
 import { generateThumbnail, readImageFile, storage } from "../utils/index.js";
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 200 * 1024 * 1024 },
+});
 
+// export const uploadVideo = async (req, res) => {
+//   const uploadSingle = promisify(upload.single("video"));
+
+//   try {
+//     await uploadSingle(req, res);
+
+//     if (!req.file) {
+//       return res.status(400).json({ message: "No file uploaded!" });
+//     }
+
+//     const { title } = req.body;
+//     if (!title) {
+//       return res.status(400).json({ message: "Title is required!" });
+//     }
+
+//     const videoPath = req.file.path;
+//     const thumbnailPath = `public/thumbnails/${Date.now()}_thumbnail.webp`;
+
+//     await generateThumbnail(videoPath, thumbnailPath);
+
+//     const videoData = {
+//       title,
+//       path: videoPath,
+//       imageUrl: thumbnailPath,
+//     };
+
+//     const savedVideo = await createVideo(videoData);
+
+//     return res.status(200).json({
+//       message: "Video uploaded and saved successfully!",
+//       video: savedVideo,
+//     });
+//   } catch (error) {
+//     console.error("[uploadVideo]", error);
+
+//     if (error instanceof multer.MulterError) {
+//       return res
+//         .status(500)
+//         .json({ message: "Multer error occurred during upload!" });
+//     }
+
+//     if (error.message === "THUMBNAIL_GENERATION_FAILED") {
+//       return res.status(500).json({
+//         message: "Video uploaded but failed to generate thumbnail!",
+//       });
+//     }
+
+//     return res.status(500).json({ message: "Something went wrong!" });
+//   }
+// };
 export const uploadVideo = async (req, res) => {
   const uploadSingle = promisify(upload.single("video"));
 
   try {
     await uploadSingle(req, res);
+
+    console.log("Request Headers:", req.headers);
+    console.log("Request Body:", req.body);
+    console.log("Request File:", req.file);
 
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded!" });
