@@ -10,3 +10,12 @@ img {
   height: 6rem;
   object-fit: cover;
 }
+
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  text-align: center;
+  align-items: center;
+}

@@ -17,21 +17,6 @@ export const authentication = (salt, password) => {
     .digest("hex");
 };
 
-// export const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     const uploadPath = "public/videos";
-//     if (!fs.existsSync(uploadPath)) {
-//       fs.mkdirSync(uploadPath, { recursive: true });
-//     }
-//     cb(null, uploadPath);
-//   },
-//   filename: function (req, file, cb) {
-//     const ext = path.extname(file.originalname);
-//     const filename = `${file.fieldname}-${Date.now()}${ext}`;
-//     cb(null, filename);
-//   },
-// });
-
 export const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = "public/videos";

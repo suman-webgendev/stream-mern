@@ -4,7 +4,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import fileUpload from "express-fileupload";
 import session from "express-session";
 import http from "http";
 import mongoose from "mongoose";
@@ -35,7 +34,6 @@ app.use(
   })
 );
 
-app.use(fileUpload());
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());

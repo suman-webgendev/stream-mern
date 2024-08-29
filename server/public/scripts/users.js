@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     ordering: true,
     searching: true,
     paging: true,
-    pageLength: 25,
-    lengthMenu: [10, 25, 50, 100],
+    pageLength: 5,
+    lengthMenu: [5, 10, 15, 20],
     order: [[0, "desc"]],
   });
 });

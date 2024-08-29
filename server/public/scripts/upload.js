@@ -1,36 +1,60 @@
 document.getElementById("uploadForm").addEventListener("submit", function (e) {
-  e.preventDefault(); // Prevent default form submission
+  e.preventDefault();
 
-  const formData = new FormData(this); // Create a new FormData object from the form
+  const formData = new FormData(this);
+  const loader = document.getElementById("loader");
+  const messageBoxContainer = document.getElementById("messageBox-container");
+  const messageBox = document.getElementById("messageBox");
 
-  // Debugging: Log all FormData entries to ensure data is correctly populated
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}:`, value);
-  }
+  loader.style.display = "flex";
+  messageBoxContainer.style.display = "none";
 
-  // Send the form data to the API endpoint
   fetch("/videos/upload", {
-    // Replace with your actual API endpoint
     method: "POST",
     body: formData,
   })
-    .then((response) => {
+    .then(async (response) => {
+      loader.style.display = "none";
+
       if (response.ok) {
-        return response.json().catch(() => response.text());
+        try {
+          return await response.json();
+        } catch {
+          return await response.text();
+        }
       }
-      return Promise.reject(response); // Handle errors
+      return Promise.reject(response);
     })
     .then((data) => {
+      document.getElementById("uploadForm").reset();
+
+      messageBoxContainer.style.display = "block";
+
       if (typeof data === "string") {
-        console.log("Server message:", data);
+        messageBox.textContent = "Server message: " + data;
       } else {
-        console.log("Server response:", data); // Expected output on success
+        messageBox.textContent = "Video uploaded successfully!";
       }
+      messageBox.classList.add("alert-success");
+      setTimeout(() => {
+        messageBoxContainer.style.display = "none";
+      }, 5000);
     })
     .catch((error) => {
-      console.error("Error:", error);
-      error.text().then((errorMessage) => {
-        console.error("Error message:", errorMessage);
-      });
+      loader.style.display = "none";
+      messageBox.style.display = "block";
+      messageBox.classList.add("alert-error");
+
+      error
+        .text()
+        .then((errorMessage) => {
+          messageBox.textContent = "Error: " + errorMessage;
+        })
+        .catch(() => {
+          messageBox.textContent = "An error occurred during the upload.";
+        });
+      setTimeout(() => {
+        messageBoxContainer.style.display = "none";
+      }, 5000);
     });
 });

@@ -7,7 +7,6 @@ import { generateThumbnail, readImageFile, storage } from "../utils/index.js";
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 200 * 1024 * 1024 },
 });
 
 // export const uploadVideo = async (req, res) => {
@@ -92,7 +91,7 @@ export const uploadVideo = async (req, res) => {
 
     const savedVideo = await createVideo(videoData);
 
-    return res.status(200).json({
+    return res.status(201).json({
       message: "Video uploaded and saved successfully!",
       video: savedVideo,
     });

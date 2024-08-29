@@ -69,27 +69,8 @@ export const displayUploadVideo = (req, res) => {
   return res.render("upload", { currentPage: "videos" });
 };
 
-export const handleUploadVideo = (req, res) => {
-  if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).json({ error: "No files were uploaded." });
-  }
-
-  const videoFile = req.files.videoFile;
-  const videoTitle = req.body.videoTitle;
-
-  if (!videoTitle) {
-    return res.status(400).json({ error: "Video title is required." });
-  }
-
-  console.log("Video Title:", videoTitle);
-  console.log("File name:", videoFile.name);
-  console.log("File size:", videoFile.size);
-
-  res.json({
-    message: "File uploaded successfully",
-    title: videoTitle,
-    fileName: videoFile.name,
-  });
+export const displayAddUser = (req, res) => {
+  return res.render("adduser", { currentPage: "users" });
 };
 
 export const users = async (req, res) => {

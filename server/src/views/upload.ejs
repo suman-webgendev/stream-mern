@@ -17,11 +17,39 @@
       defer
     ></script>
     <script src="/scripts/upload.js" defer></script>
-    <title>Upload Videos | Admin Dashboard</title>
+    <title>Upload | Admin Dashboard</title>
   </head>
   <body>
-    <main>
+    <main style="position: relative">
       <%- include ('partials/navbar') %>
+
+      <div id="loader" style="display: none">
+        <div class="loader-wrapper">
+          <div class="blue ball"></div>
+          <div class="red ball"></div>
+          <div class="yellow ball"></div>
+          <div class="green ball"></div>
+        </div>
+      </div>
+
+      <!-- <div id="messageBox-container" style="display: none">
+        <div
+          class="alert alert-dismissible fade show"
+          id="messageBox"
+          role="alert"
+        >
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
+        </div>
+      </div> -->
+
+      <div id="messageBox-container" style="display: none">
+        <div class="alert fade show" id="messageBox" role="alert"></div>
+      </div>
 
       <div class="content-wrapper">
         <form class="form" id="uploadForm" enctype="multipart/form-data">
@@ -48,7 +76,7 @@
           </div>
 
           <div>
-            <button type="submit" class="container-btn-file">
+            <button class="container-btn-file">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"

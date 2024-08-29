@@ -1,8 +1,8 @@
 import {
   dashboard,
+  displayAddUser,
   displayUploadVideo,
   handleLogin,
-  handleUploadVideo,
   renderLoginPage,
   users,
   videos,
@@ -15,5 +15,5 @@ export default (router) => {
   router.get("/admin/users", users);
   router.get("/admin/videos", videos);
   router.get("/admin/video/upload", displayUploadVideo);
-  router.post("/admin/video/upload", handleUploadVideo);
+  router.get("/admin/user/create", displayAddUser);
 };
