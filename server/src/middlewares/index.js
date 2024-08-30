@@ -1,5 +1,6 @@
 import pkg from "lodash";
 import { getUserBySessionToken } from "../actions/users.js";
+import { logger } from "../utils/index.js";
 const { merge } = pkg;
 
 export const isAuthenticated = async (req, res, next) => {
@@ -20,7 +21,7 @@ export const isAuthenticated = async (req, res, next) => {
 
     return next();
   } catch (error) {
-    console.error("isAuthenticated middleware: ", error.stack);
+    logger.error("isAuthenticated middleware: ", error.stack);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };

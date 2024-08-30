@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { getUserByEmail, getUserBySessionToken } from "../actions/users.js";
-import { authentication, random } from "../utils/index.js";
+import {
+  createUser,
+  getUserByEmail,
+  getUserBySessionToken,
+} from "../actions/users.js";
+import { authentication, logger, random } from "../utils/index.js";
 
 dotenv.config();
 
@@ -34,7 +38,7 @@ export const register = async (req, res) => {
       .json({ message: "User registered successfully!" })
       .end();
   } catch (error) {
-    console.error(error);
+    logger.error("[REGISTER_USER]", error);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };
@@ -81,7 +85,7 @@ export const login = async (req, res) => {
       message: "Successfully logged in.",
     });
   } catch (error) {
-    console.error(error);
+    logger.error("[LOGIN_USER]", error);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };
@@ -108,7 +112,7 @@ export const logout = async (req, res) => {
 
     return res.status(200).json({ message: "Successfully logged out." });
   } catch (error) {
-    console.error("Logout error:", error);
+    logger.error("[LOGOUT_USER]", error);
     return res
       .status(500)
       .json({ message: "An error occurred during logout." });
@@ -129,6 +133,7 @@ export const authCheck = async (req, res) => {
 
     return res.status(200).json({ authenticated: true });
   } catch (error) {
-    res.status(401).json({ authenticated: false });
+    logger.error("[USER_AUTH_CHECK]", error);
+    return res.status(401).json({ authenticated: false });
   }
 };

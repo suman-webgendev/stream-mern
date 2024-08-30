@@ -1,13 +1,8 @@
-import { VideoModel } from "../db/videos.js";
+import { db } from "../db/index.js";
 
-export const getVideos = () => VideoModel.find().sort([["createdAt", -1]]);
+export const getVideos = () => db.Video.find().sort([["createdAt", -1]]);
 
-export const getVideoById = (id) => VideoModel.findById(id);
+export const getVideoById = (id) => db.Video.findById(id);
 
 export const createVideo = (values) =>
-  new VideoModel(values).save().then((video) => video.toObject());
-
-export const deleteVideoById = (id) => VideoModel.findOneAndDelete({ _id: id });
-
-export const updateVideoById = (id, values) =>
-  VideoModel.findByIdAndUpdate(id, values);
+  new db.Video(values).save().then((video) => video.toObject());

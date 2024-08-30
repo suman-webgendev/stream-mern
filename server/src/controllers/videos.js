@@ -3,7 +3,12 @@ import mongoose from "mongoose";
 import multer from "multer";
 import { promisify } from "util";
 import { createVideo, getVideoById, getVideos } from "../actions/videos.js";
-import { generateThumbnail, readImageFile, storage } from "../utils/index.js";
+import {
+  generateThumbnail,
+  logger,
+  readImageFile,
+  storage,
+} from "../utils/index.js";
 
 const upload = multer({
   storage: storage,
@@ -43,7 +48,7 @@ export const uploadVideo = async (req, res) => {
       video: savedVideo,
     });
   } catch (error) {
-    console.error("[uploadVideo]", error);
+    logger.error("[uploadVideo]", error);
 
     if (error instanceof multer.MulterError) {
       return res
@@ -81,7 +86,7 @@ export const getAllVideos = async (req, res) => {
 
     return res.status(200).json(videosWithImages);
   } catch (error) {
-    console.error("[getAllVideos]", error);
+    logger.error("[getAllVideos]", error);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };
@@ -128,7 +133,7 @@ export const getVideo = async (req, res) => {
     videoStream.pipe(res);
     return;
   } catch (error) {
-    console.error("[getVideo]", error);
+    logger.error("[getVideo]", error);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };

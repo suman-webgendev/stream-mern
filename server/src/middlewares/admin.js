@@ -1,5 +1,6 @@
 import pkg from "lodash";
 import { getAdminBySessionToken } from "../actions/admin.js";
+import { logger } from "../utils/index.js";
 const { merge } = pkg;
 
 export const isAuthenticatedAdmin = async (req, res, next) => {
@@ -16,7 +17,7 @@ export const isAuthenticatedAdmin = async (req, res, next) => {
 
     return next();
   } catch (error) {
-    console.error("isAuthenticated middleware: ", error.cause);
+    logger.error("isAuthenticated middleware: ", error.cause);
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };

@@ -1,20 +1,15 @@
-import { UserModel } from "../db/users.js";
+import { db } from "../db/index.js";
 
-export const getUsers = () => UserModel.find().sort([["createdAt", -1]]);
+export const getUsers = () => db.User.find().sort([["createdAt", -1]]);
 
-export const getUserById = (id) => UserModel.findById(id);
+export const getUserById = (id) => db.User.findById(id);
 
-export const getUserByEmail = (email) => UserModel.findOne({ email });
+export const getUserByEmail = (email) => db.User.findOne({ email });
 
 export const getUserBySessionToken = (sessionToken) =>
-  UserModel.findOne({
+  db.User.findOne({
     "authentication.sessionToken": sessionToken,
   });
 
 export const createUser = (values) =>
-  new UserModel(values).save().then((user) => user.toObject());
-
-export const deleteUserById = (id) => UserModel.findOneAndDelete({ _id: id });
-
-export const updateUserById = (id, values) =>
-  UserModel.findByIdAndUpdate(id, values);
+  new db.User(values).save().then((user) => user.toObject());

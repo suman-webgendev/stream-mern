@@ -10,6 +10,7 @@ import path from "path";
 import { Server } from "socket.io";
 import { fileURLToPath } from "url";
 import router from "./router/index.js";
+import { logger } from "./utils/index.js";
 
 dotenv.config();
 
@@ -46,19 +47,19 @@ mongoose.connect(process.env.DATABASE_URL);
 const chatNamespace = io.of("/chat");
 
 chatNamespace.on("connection", (socket) => {
-  console.log("a user connected");
+  logger.success("a user connected");
 });
 
 mongoose.connection.on("error", (error) => {
-  console.error("Database connection error:", error);
+  logger.error("Database connection error:", error);
 });
 
 mongoose.connection.once("connected", () => {
-  console.log("Database connected");
+  logger.success("Database connected");
 });
 
 app.use("/", router());
 
 server.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  logger.info(`Server running on http://localhost:${port}`);
 });

@@ -1,4 +1,5 @@
 import { exec } from "child_process";
+import colors from "colors";
 import crypto from "crypto";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -39,7 +40,7 @@ export const generateThumbnail = async (videoPath, thumbnailPath) => {
       const command = `ffmpeg -i ${videoPath} -ss 00:00:02.000 -vframes 1 ${tempThumbnailPath}`;
       exec(command, (error, stdout, stderr) => {
         if (error) {
-          console.error("[generateThumbnail] FFmpeg error:", error);
+          logger.error("[generateThumbnail] FFmpeg error:", error);
           reject(error);
         } else {
           resolve();
@@ -58,7 +59,7 @@ export const generateThumbnail = async (videoPath, thumbnailPath) => {
     await new Promise((resolve, reject) => {
       fs.unlink(tempThumbnailPath, (err) => {
         if (err) {
-          console.error("[generateThumbnail] Error deleting temp file:", err);
+          logger.error("[generateThumbnail] Error deleting temp file:", err);
           reject(err);
         } else {
           resolve();
@@ -68,7 +69,7 @@ export const generateThumbnail = async (videoPath, thumbnailPath) => {
 
     return thumbnailPath;
   } catch (error) {
-    console.error("[generateThumbnail] Error:", error);
+    logger.error("[generateThumbnail] Error:", error);
     throw error;
   }
 };
@@ -77,7 +78,7 @@ export const readImageFile = (imagePath) => {
   return new Promise((resolve, reject) => {
     fs.readFile(imagePath, (err, data) => {
       if (err) {
-        console.error("[readImageFile]", err);
+        logger.error("[readImageFile]", err);
         reject(err);
       } else {
         const base64Image = Buffer.from(data).toString("base64");
@@ -85,4 +86,19 @@ export const readImageFile = (imagePath) => {
       }
     });
   });
+};
+
+export const logger = {
+  error(...args) {
+    console.log(colors.red(...args));
+  },
+  warn(...args) {
+    console.log(colors.yellow(...args));
+  },
+  info(...args) {
+    console.log(colors.cyan(...args));
+  },
+  success(...args) {
+    console.log(colors.green(...args));
+  },
 };

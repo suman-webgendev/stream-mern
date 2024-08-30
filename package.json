@@ -13,8 +13,8 @@
     "clear": "concurrently \"pnpm run server:clear\" \"pnpm run client:clear\""
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Suman-JS",
+  "license": "MIT",
   "dependencies": {
     "concurrently": "^8.2.2"
   }

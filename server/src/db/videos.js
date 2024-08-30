@@ -8,4 +8,4 @@ const videoSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-export const VideoModel = mongoose.model("Video", videoSchema);
+export const Video = mongoose.model("Video", videoSchema);

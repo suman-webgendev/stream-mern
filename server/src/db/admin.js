@@ -12,4 +12,4 @@ const adminSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-export const AdminModel = mongoose.model("Admin", adminSchema);
+export const Admin = mongoose.model("Admin", adminSchema);

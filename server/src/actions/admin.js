@@ -1,20 +1,15 @@
-import { AdminModel } from "../db/admin.js";
+import { db } from "../db/index.js";
 
-export const getAdmins = () => AdminModel.find().sort([["createdAt", -1]]);
+export const getAdmins = () => db.Admin.find().sort([["createdAt", -1]]);
 
-export const getAdminById = (id) => AdminModel.findById(id);
+export const getAdminById = (id) => db.Admin.findById(id);
 
-export const getAdminByEmail = (email) => AdminModel.findOne({ email });
+export const getAdminByEmail = (email) => db.Admin.findOne({ email });
 
 export const getAdminBySessionToken = (sessionToken) =>
-  AdminModel.findOne({
+  db.Admin.findOne({
     "authentication.sessionToken": sessionToken,
   });
 
 export const createAdmin = (values) =>
-  new AdminModel(values).save().then((admin) => admin.toObject());
-
-export const deleteAdminById = (id) => AdminModel.findOneAndDelete({ _id: id });
-
-export const updateAdminById = (id, values) =>
-  AdminModel.findByIdAndUpdate(id, values);
+  new db.Admin(values).save().then((admin) => admin.toObject());
