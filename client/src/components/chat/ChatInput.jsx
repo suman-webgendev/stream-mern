@@ -1,17 +1,46 @@
-import EmojiPicker from "@/components/chat/EmojiPicker";
 import { Input } from "@/components/ui/input";
+import { useCallback, useRef } from "react";
+import { Button } from "../ui/button";
+import EmojiPicker from "./EmojiPicker";
 
 const ChatInput = () => {
+  const inputRef = useRef(null);
+
+  const handleMessageSend = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const message = formData.get("message");
+    alert(message);
+    e.target.reset();
+  };
+
+  const handleEmojiSelect = useCallback((emoji) => {
+    if (inputRef.current) {
+      const input = inputRef.current;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const text = input.value;
+      input.value = text.substring(0, start) + emoji + text.substring(end);
+      input.setSelectionRange(start + emoji.length, start + emoji.length);
+      input.focus();
+    }
+  }, []);
+
   return (
-    <form>
+    <form className="flex w-full gap-2" onSubmit={handleMessageSend}>
       <Input
-        disabled={false}
-        className="border-0 border-none bg-zinc-200/90 px-14 py-6 text-zinc-600 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-zinc-700/75 dark:text-zinc-200"
+        ref={inputRef}
+        type="text"
         autoComplete="off"
+        className="relative w-full"
+        placeholder="Type something..."
+        name="message"
+        autoFocus
       />
-      <div className="absolute right-8 top-7">
-        <EmojiPicker />
+      <div className="absolute bottom-2 right-20">
+        <EmojiPicker onEmojiSelect={handleEmojiSelect} />
       </div>
+      <Button>Send</Button>
     </form>
   );
 };

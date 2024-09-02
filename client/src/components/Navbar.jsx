@@ -52,17 +52,31 @@ const Navbar = () => {
               </li>
             </>
           ) : (
-            <li>
-              <Button
-                variant="link"
-                onClick={handleSignOut}
-                className="text-lg"
-                tabIndex={1}
-                disabled={isPending}
-              >
-                Logout
+            <>
+              <li>
+                <Button variant="link" disabled={isPending} tabIndex={-1}>
+                  <Link to="/" className="text-lg">
+                    Videos
+                  </Link>
+                </Button>
+              </li>
+              <Button variant="link" disabled={isPending} tabIndex={-1}>
+                <Link to="/chat" className="text-lg">
+                  Chat
+                </Link>
               </Button>
-            </li>
+              <li>
+                <Button
+                  variant="link"
+                  onClick={handleSignOut}
+                  className="text-lg"
+                  tabIndex={1}
+                  disabled={isPending}
+                >
+                  Logout
+                </Button>
+              </li>
+            </>
           )}
         </ul>
 

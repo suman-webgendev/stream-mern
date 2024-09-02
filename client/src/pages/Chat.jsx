@@ -1,14 +1,18 @@
+import ChatHeader from "@/components/chat/ChatHeader";
 import ChatInput from "@/components/chat/ChatInput";
-import EmojiPicker from "@/components/chat/EmojiPicker";
-import MessageContainer from "@/components/chat/MessageContainer";
+import ChatSidebar from "@/components/chat/ChatSidebar";
+import MessageViewer from "@/components/chat/MessageViewer";
 
 const Chat = () => {
   return (
-    <div>
-      <MessageContainer />
-      <div className="flex items-center justify-between">
+    <div className="grid grid-cols-[20rem_minmax(0,_1fr)] gap-1">
+      <div>
+        <ChatSidebar />
+      </div>
+      <div>
+        <ChatHeader />
+        <MessageViewer />
         <ChatInput />
-        <EmojiPicker />
       </div>
     </div>
   );

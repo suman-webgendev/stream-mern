@@ -123,17 +123,19 @@ export const authCheck = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];
 
-    if (!token) return res.status(200).json({ authenticated: false });
+    if (!token)
+      return res.status(200).json({ authenticated: false, user: null });
 
     jwt.verify(token, process.env.AUTH_SECRET);
 
     const existingUser = await getUserBySessionToken(token);
 
-    if (!existingUser) return res.status(200).json({ authenticated: false });
+    if (!existingUser)
+      return res.status(200).json({ authenticated: false, user: null });
 
-    return res.status(200).json({ authenticated: true });
+    return res.status(200).json({ authenticated: true, user: existingUser });
   } catch (error) {
     logger.error("[USER_AUTH_CHECK]", error);
-    return res.status(401).json({ authenticated: false });
+    return res.status(401).json({ authenticated: false, user: null });
   }
 };
