@@ -10,24 +10,45 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import LoadingChats from "./LoadingChats";
 import SearchUserCard from "./SearchUserCard";
 
 const SearchUser = () => {
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { setSelectedChat } = useChat();
 
   const queryClient = useQueryClient();
 
   const debouncedInput = useDebounce(input);
 
+  const accessChat = useCallback(
+    async (userId) => {
+      try {
+        setLoading(true);
+        const { data } = await api.post("/api/chat", { userId });
+
+        setSelectedChat(data);
+        setIsOpen(false);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setSelectedChat],
+  );
+
   const {
     data: users,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     queryKey: ["SearchUsers", debouncedInput],
@@ -44,7 +65,7 @@ const SearchUser = () => {
   }, [debouncedInput, queryClient]);
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" className="my-1 w-full justify-between">
           Search <Search />
@@ -71,10 +92,13 @@ const SearchUser = () => {
         <SheetFooter className="grid grid-cols-1 gap-1 self-center">
           <div>
             {!error && users?.length === 0 && <div>No users found!</div>}
-            {isFetching && <LoadingChats />}
+            {isLoading && <LoadingChats />}
             {users?.map((user) => (
               <div key={user._id} className="mb-1">
-                <SearchUserCard user={user} />
+                <SearchUserCard
+                  user={user}
+                  onClick={() => accessChat(user._id)}
+                />
               </div>
             ))}
           </div>

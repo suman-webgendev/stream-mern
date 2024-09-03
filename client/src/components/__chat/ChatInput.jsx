@@ -32,12 +32,12 @@ const ChatInput = () => {
         ref={inputRef}
         type="text"
         autoComplete="off"
-        className="relative w-full outline-none ring-0 focus-within:outline-none focus-within:ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+        className="relative w-full pr-8 outline-none ring-0 focus-within:outline-none focus-within:ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
         placeholder="Type something..."
         name="message"
         autoFocus
       />
-      <div className="absolute bottom-2 right-20">
+      <div className="absolute bottom-1 right-20">
         <EmojiPicker onEmojiSelect={handleEmojiSelect} />
       </div>
       <Button>Send</Button>

@@ -1,7 +1,15 @@
-import { createContext } from "react";
+import { createContext, useState } from "react";
 
 export const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-  return <ChatContext.Provider value={{}}>{children}</ChatContext.Provider>;
+  const [selectedChat, setSelectedChat] = useState();
+  const [chats, setChats] = useState([]);
+  return (
+    <ChatContext.Provider
+      value={{ selectedChat, setSelectedChat, chats, setChats }}
+    >
+      {children}
+    </ChatContext.Provider>
+  );
 };

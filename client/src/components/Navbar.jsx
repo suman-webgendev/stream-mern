@@ -1,4 +1,3 @@
-import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { api } from "@/lib/utils";
@@ -27,7 +26,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky left-0 right-0 top-0 z-[1000] flex h-[8vh] items-center justify-between bg-[rgba(0,0,0,.5)] px-6 dark:bg-white/20">
+    <nav className="sticky left-0 right-0 top-0 z-[1000] flex h-[8vh] items-center justify-between bg-[rgba(0,0,0,.15)] px-6 dark:bg-white/20">
       <div>
         <img src="/logo.svg" alt="logo" />
       </div>
@@ -61,7 +60,7 @@ const Navbar = () => {
                 </Button>
               </li>
               <Button variant="link" disabled={isPending} tabIndex={-1}>
-                <Link to="/chat" className="text-lg">
+                <Link to="/chats" className="text-lg">
                   Chat
                 </Link>
               </Button>
@@ -79,8 +78,6 @@ const Navbar = () => {
             </>
           )}
         </ul>
-
-        <ThemeToggle />
       </div>
     </nav>
   );

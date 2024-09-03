@@ -1,8 +1,19 @@
+import { useChat } from "@/hooks/useChat";
 import { Card, CardHeader } from "../ui/card";
 
 const GroupChat = ({ chat }) => {
+  const { setSelectedChat, socket } = useChat();
+
+  const handleClick = () => {
+    setSelectedChat(chat);
+
+    if (socket) {
+      socket.emit("joinRoom", chat._id);
+    }
+  };
+
   return (
-    <Card className="mb-2 cursor-pointer">
+    <Card className="mb-2 cursor-pointer" onClick={handleClick}>
       <CardHeader className="flex flex-row items-center gap-2 text-center">
         <svg
           id="usersIcon"

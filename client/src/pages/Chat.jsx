@@ -1,19 +1,19 @@
-import ChatHeader from "@/components/chat/ChatHeader";
-import ChatInput from "@/components/chat/ChatInput";
-import ChatSidebar from "@/components/chat/ChatSidebar";
-import MessageViewer from "@/components/chat/MessageViewer";
+import ChatBox from "@/components/chat/ChatBox";
+import MyChats from "@/components/chat/MyChats";
+import SideDrawer from "@/components/chat/SideDrawer";
+import { useAuth } from "@/hooks/useAuth";
+import { Box } from "@chakra-ui/react";
 
 const Chat = () => {
+  const { user } = useAuth();
+
   return (
-    <div className="grid grid-cols-[20rem_minmax(0,_1fr)] gap-1">
-      <div>
-        <ChatSidebar />
-      </div>
-      <div>
-        <ChatHeader />
-        <MessageViewer />
-        <ChatInput />
-      </div>
+    <div className="w-full">
+      {user && <SideDrawer />}
+      <Box d="flex" justifyContent="space-between" w="100%" h="91.5vh" p="10px">
+        {user && <MyChats />}
+        {user && <ChatBox />}
+      </Box>
     </div>
   );
 };
