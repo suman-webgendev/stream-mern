@@ -32,7 +32,7 @@ const ChatInput = () => {
         ref={inputRef}
         type="text"
         autoComplete="off"
-        className="relative w-full"
+        className="relative w-full outline-none ring-0 focus-within:outline-none focus-within:ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
         placeholder="Type something..."
         name="message"
         autoFocus

@@ -1,23 +1,31 @@
-import LoadingChats from "@/components/chat/LoadingChats";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { api } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { ScrollArea } from "../ui/scroll-area";
+import MyMessage from "./MyMessage";
+import YourMessage from "./YourMessage";
 
 const MessageContainer = () => {
-  const { data, isPending, error } = useQuery({
-    queryKey: ["chats"],
-    queryFn: async () => {
-      const res = await api.get("/api/chat");
-      return res.data;
-    },
-  });
-
-  if (!error && isPending) return <LoadingChats />;
-
   return (
-    <div className="h-[85vh]">
-      <ScrollArea className="size-full p-2">{JSON.stringify(data)}</ScrollArea>
-    </div>
+    <ScrollArea className="h-[82vh] w-full">
+      <div className="flex w-full flex-col p-2.5">
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+        <MyMessage />
+        <YourMessage />
+      </div>
+    </ScrollArea>
   );
 };
 
