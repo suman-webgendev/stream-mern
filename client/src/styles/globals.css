@@ -83,4 +83,16 @@
   .videoBtn {
     @apply transition-opacity opacity-85 hover:opacity-100 cursor-pointer bg-none border-none text-inherit p-0 size-8 text-[1.1rem];
   }
+
+  ::-webkit-scrollbar {
+    width: 0;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(136, 136, 136, 0.281);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
 }

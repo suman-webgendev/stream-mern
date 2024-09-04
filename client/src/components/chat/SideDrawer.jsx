@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
+import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/utils";
 import { BellIcon } from "@chakra-ui/icons";
 import {
@@ -14,6 +15,7 @@ import {
   Input,
   Menu,
   MenuButton,
+  Spinner,
   Text,
   Tooltip,
   useDisclosure,
@@ -33,12 +35,14 @@ const SideDrawer = () => {
   const toast = useToast();
   const { chats, setChats, setSelectedChat } = useChat();
 
-  const { mutateAsync: accessChat } = useMutation({
+  const { mutateAsync: accessChat, isPending: loadingChats } = useMutation({
     mutationFn: async (userId) => {
       const { data } = await api.post("/api/chat", { userId });
+
       return data;
     },
     onSuccess: (data) => {
+      if (!chats.find((c) => c._id === data._id)) setChats(data, ...chats);
       setSelectedChat(data);
     },
     onError: (error) => {
@@ -56,6 +60,8 @@ const SideDrawer = () => {
     },
   });
 
+  const debouncedSearch = useDebounce(search);
+
   const {
     mutateAsync: searchUsers,
     isPending,
@@ -71,7 +77,9 @@ const SideDrawer = () => {
           isClosable: true,
         });
       }
-      const { data } = await api.get(`/api/chat/find-user?search=${search}`);
+      const { data } = await api.get(
+        `/api/chat/find-user?search=${debouncedSearch}`,
+      );
       return data;
     },
     onSuccess: (data) => {
@@ -160,6 +168,7 @@ const SideDrawer = () => {
                   handleClick={() => accessChat(user._id)}
                 />
               ))}
+            {loadingChats && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

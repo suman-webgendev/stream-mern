@@ -85,6 +85,8 @@ const VideoPlayer = (props) => {
       const tagName = document.activeElement?.tagName.toLowerCase();
       if (tagName === "input") return;
 
+      if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) return;
+
       const keyHandlers = {
         " ": () => tagName !== "button" && handlePlayPause(),
         k: handlePlayPause,

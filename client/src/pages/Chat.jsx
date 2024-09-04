@@ -10,7 +10,13 @@ const Chat = () => {
   return (
     <div className="w-full">
       {user && <SideDrawer />}
-      <Box d="flex" justifyContent="space-between" w="100%" h="91.5vh" p="10px">
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        w="100%"
+        h="91.5vh"
+        p="10px"
+      >
         {user && <MyChats />}
         {user && <ChatBox />}
       </Box>

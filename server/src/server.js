@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { rateLimit } from "express-rate-limit";
 import http from "http";
 import mongoose from "mongoose";
 import path from "path";
@@ -25,17 +26,27 @@ app.use(
   cors({
     credentials: true,
     origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Range"],
   })
 );
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5000,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { message: "Too many requests, please try again later." },
+});
+
+app.use(limiter);
 
 app.options(
   "*",
   cors({
     credentials: true,
     origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Range"],
   })
 );
