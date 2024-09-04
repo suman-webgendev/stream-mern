@@ -40,13 +40,12 @@ const MyChats = () => {
       bg="white"
       borderRadius="lg"
       borderWidth="1px"
-      w={{ base: "100%", md: "31%" }}
+      w={{ base: "100%", md: "25%" }}
     >
       <Box
         px={3}
         pb={3}
         fontSize={{ base: "24px", md: "30px" }}
-        fontFamily="Work sans"
         display="flex"
         w="100%"
         justifyContent="space-between"

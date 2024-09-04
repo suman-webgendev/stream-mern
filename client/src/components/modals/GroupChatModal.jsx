@@ -13,6 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -139,12 +140,7 @@ const GroupChatModal = ({ children }) => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader
-            fontSize="35px"
-            fontFamily="Work sans"
-            display="flex"
-            justifyContent="center"
-          >
+          <ModalHeader fontSize="35px" display="flex" justifyContent="center">
             Create Group Chat
           </ModalHeader>
           <ModalCloseButton />
@@ -175,7 +171,7 @@ const GroupChatModal = ({ children }) => {
               ))}
             </Box>
             {isPending ? (
-              <div>loading...</div>
+              <Spinner size="lg" />
             ) : (
               searchResults
                 ?.slice(0, 4)
