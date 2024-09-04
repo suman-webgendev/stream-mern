@@ -90,7 +90,6 @@ export const getAllVideos = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };
-
 export const getVideo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -107,8 +106,6 @@ export const getVideo = async (req, res) => {
     if (!video)
       return res.status(404).json({ message: "Video does not exist!" });
 
-    const videoTitle = video.name;
-
     const videoPath = video.path;
     const stat = fs.statSync(videoPath);
     const fileSize = stat.size;
@@ -119,8 +116,11 @@ export const getVideo = async (req, res) => {
 
     const parts = range.replace(/bytes=/, "").split("-");
     const start = parseInt(parts[0], 10);
-    const chunkSize = 1 * 1024 * 1024;
-    const end = Math.min(start + chunkSize - 1, fileSize - 1);
+    const end = parts[1]
+      ? parseInt(parts[1], 10)
+      : Math.min(start + 0.5 * 1024 * 1024 - 1, fileSize - 1);
+
+    const chunkSize = end - start + 1;
 
     const headers = {
       "Content-Range": `bytes ${start}-${end}/${fileSize}`,
@@ -128,10 +128,10 @@ export const getVideo = async (req, res) => {
       "Content-Length": chunkSize.toString(),
       "Content-Type": "video/mp4",
     };
+
     res.writeHead(206, headers);
     const videoStream = fs.createReadStream(videoPath, { start, end });
     videoStream.pipe(res);
-    return;
   } catch (error) {
     logger.error("[getVideo]", error);
     return res.status(500).json({ message: "Something went wrong!" });

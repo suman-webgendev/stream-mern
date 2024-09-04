@@ -8,7 +8,6 @@ const VideoPage = () => {
   const location = useLocation();
   const { title, videoId } = location.state || {};
 
-  console.log(title, videoId);
   return (
     <>
       <div className="flex h-full flex-col items-center justify-center p-2">
