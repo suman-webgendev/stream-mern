@@ -8,7 +8,7 @@ import Picker from "@emoji-mart/react";
 import { Smile } from "lucide-react";
 import { useState } from "react";
 
-const EmojiPicker = ({ onEmojiSelect }) => {
+const EmojiPicker = ({ onEmojiSelect, emojiPickerRef }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleEmojiSelect = (emoji) => {
@@ -21,6 +21,7 @@ const EmojiPicker = ({ onEmojiSelect }) => {
       <PopoverTrigger asChild>
         <Smile
           onClick={() => setIsOpen(!isOpen)}
+          ref={emojiPickerRef}
           className="cursor-pointer text-zinc-500 transition hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300"
         />
       </PopoverTrigger>

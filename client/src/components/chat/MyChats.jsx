@@ -45,8 +45,9 @@ const MyChats = () => {
       <Box
         px={3}
         pb={3}
-        fontSize={{ base: "24px", md: "30px" }}
+        fontSize={{ base: "24px", md: "24px" }}
         display="flex"
+        flexDir={{ base: "row", md: "column", lg: "column", xl: "row" }}
         w="100%"
         justifyContent="space-between"
         alignItems="center"

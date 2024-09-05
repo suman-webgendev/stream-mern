@@ -65,15 +65,6 @@ app.use(express.static("public"));
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  pingTimeout: 60000,
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST", "PUT"],
-    credentials: true,
-  },
-});
-
 // MongoDB connection
 mongoose.Promise = Promise;
 mongoose.connect(process.env.DATABASE_URL);
@@ -84,10 +75,6 @@ mongoose.connection.on("error", (error) => {
 
 mongoose.connection.once("connected", () => {
   logger.success("Database connected");
-});
-
-io.on("connection", (socket) => {
-  console.log("connected to socket");
 });
 
 // Use routes
@@ -102,4 +89,50 @@ app.use((err, req, res, next) => {
 // Start server
 server.listen(port, () => {
   logger.info(`Server running on http://localhost:${port}`);
+});
+
+// Socket.IO
+
+const io = new Server(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: [process.env.CLIENT_URL],
+    methods: ["GET", "POST", "PUT"],
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  logger.success(`Socket ${socket.id} connected`);
+
+  socket.on("setup", (userData) => {
+    socket.join(userData._id);
+    socket.emit("connected");
+  });
+
+  socket.on("join chat", (roomId) => {
+    socket.join(roomId);
+    logger.success("user joined room", roomId);
+  });
+
+  socket.on("new message", (newMessageReceived) => {
+    let chat = newMessageReceived.chat;
+
+    if (!chat.users) return logger.error("users not defined");
+
+    chat.users.forEach((user) => {
+      if (user._id === newMessageReceived.sender._id) return;
+
+      socket.in(user._id).emit("message received", newMessageReceived);
+    });
+  });
+
+  socket.on("typing", (roomId) => socket.in(roomId).emit("typing"));
+  socket.on("stopped typing", (roomId) =>
+    socket.in(roomId).emit("stopped typing")
+  );
+
+  socket.on("disconnect", () => {
+    logger.warn(`Socket ${socket.id} disconnected`);
+  });
 });
