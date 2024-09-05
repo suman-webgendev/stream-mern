@@ -3,6 +3,7 @@ import { getUserBySessionToken } from "../actions/users.js";
 import { logger } from "../utils/index.js";
 const { merge } = pkg;
 
+//! Checks if user logged in or not using cookie
 export const isAuthenticated = async (req, res, next) => {
   try {
     const sessionToken = req.cookies["stream_auth"];

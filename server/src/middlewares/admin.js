@@ -3,6 +3,7 @@ import { getAdminBySessionToken } from "../actions/admin.js";
 import { logger } from "../utils/index.js";
 const { merge } = pkg;
 
+//! Checks if any admin authenticated or not by taking cookie
 export const isAuthenticatedAdmin = async (req, res, next) => {
   try {
     const sessionToken = req.cookies["stream_auth"];

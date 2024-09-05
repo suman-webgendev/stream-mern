@@ -15,6 +15,7 @@ const upload = multer({
   limits: 100 * 1024 * 1024,
 });
 
+//! Video upload
 export const uploadVideo = async (req, res) => {
   const uploadSingle = promisify(upload.single("video"));
 
@@ -66,6 +67,7 @@ export const uploadVideo = async (req, res) => {
   }
 };
 
+//! Get all video list
 export const getAllVideos = async (req, res) => {
   try {
     const videos = await getVideos();
@@ -90,6 +92,8 @@ export const getAllVideos = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong!" });
   }
 };
+
+//! Get a particular video based on the id
 export const getVideo = async (req, res) => {
   try {
     const { id } = req.params;

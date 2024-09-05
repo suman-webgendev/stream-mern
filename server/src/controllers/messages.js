@@ -39,7 +39,6 @@ export const sendMessage = async (req, res) => {
 //! Fetch all the message for a particular chat
 export const allMessages = async (req, res) => {
   try {
-    const currentUser = req.identity._id;
     const messages = await db.Message.find({
       chat: req.params.chatId,
     })

@@ -11,6 +11,7 @@ import { authentication, logger, readImageFile } from "../utils/index.js";
 
 dotenv.config();
 
+//! Renders login page for admin
 export const renderLoginPage = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];
@@ -30,6 +31,7 @@ export const renderLoginPage = async (req, res) => {
   }
 };
 
+//! handle login action for admin
 export const handleLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -89,6 +91,7 @@ export const handleLogin = async (req, res) => {
   }
 };
 
+//! Renders dashboard page for admin
 export const dashboard = async (req, res) => {
   try {
     const videos = await getVideos();
@@ -111,6 +114,7 @@ export const dashboard = async (req, res) => {
   }
 };
 
+//! Returns video list as data-table for admin
 export const videos = async (req, res) => {
   try {
     const videos = await getVideos();
@@ -141,14 +145,17 @@ export const videos = async (req, res) => {
   }
 };
 
+//! Renders video upload page for admin
 export const displayUploadVideo = async (req, res) => {
   return res.render("upload", { currentPage: "videos" });
 };
 
+//! Renders add user page for admin
 export const displayAddUser = async (req, res) => {
   return res.render("adduser", { currentPage: "users" });
 };
 
+//! Renders user list as data-table for admin
 export const users = async (req, res) => {
   try {
     const users = await getUsers();
@@ -165,6 +172,7 @@ export const users = async (req, res) => {
   }
 };
 
+//! Handles logout action for the admin
 export const adminLogout = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];

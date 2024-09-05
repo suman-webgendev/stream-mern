@@ -1,6 +1,7 @@
 import { getUsers } from "../actions/users.js";
 import { logger } from "../utils/index.js";
 
+//! Get all user list
 export const getAllUsers = async (req, res) => {
   try {
     const users = await getUsers();

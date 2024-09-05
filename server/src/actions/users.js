@@ -1,3 +1,5 @@
+"use strict";
+
 import { db } from "../db/index.js";
 
 export const getUsers = () => db.User.find().sort([["createdAt", -1]]);

@@ -9,6 +9,7 @@ import { authentication, logger, random } from "../utils/index.js";
 
 dotenv.config();
 
+//! Handles register action
 export const register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -43,6 +44,7 @@ export const register = async (req, res) => {
   }
 };
 
+//! Handles login action
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -90,6 +92,7 @@ export const login = async (req, res) => {
   }
 };
 
+//! Handles logout action
 export const logout = async (req, res) => {
   try {
     const token = req.cookies.stream_auth;
@@ -119,6 +122,7 @@ export const logout = async (req, res) => {
   }
 };
 
+//! Checks if a user logged in or not
 export const authCheck = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];
