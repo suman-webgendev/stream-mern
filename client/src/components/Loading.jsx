@@ -11,6 +11,9 @@ const Loading = () => {
           <span className="word">cards</span>
           <span className="word">images</span>
           <span className="word">videos</span>
+          <span className="word">messages</span>
+          <span className="word">chats</span>
+          <span className="word">notifications</span>
           <span className="word">buttons</span>
         </div>
       </div>
