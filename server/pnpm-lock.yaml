@@ -47,15 +47,16 @@ importers:
       multer:
         specifier: 1.4.5-lts.1
         version: 1.4.5-lts.1
-      nodemon:
-        specifier: ^3.1.4
-        version: 3.1.4
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
       socket.io:
         specifier: ^4.7.5
         version: 4.7.5
+    devDependencies:
+      nodemon:
+        specifier: ^3.1.4
+        version: 3.1.4
 
 packages:
 
