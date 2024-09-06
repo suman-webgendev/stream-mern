@@ -38,6 +38,7 @@ const SingleChat = () => {
   const toast = useToast();
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -130,7 +131,11 @@ const SingleChat = () => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
   };
 
   const sendMessage = useCallback(
@@ -291,10 +296,10 @@ const SingleChat = () => {
                 accept="image/*"
                 onChange={handleImageUpload}
                 display="none"
-                id="image-upload"
+                ref={fileInputRef}
               />
               <Paperclip
-                onClick={() => document.getElementById("image-upload").click()}
+                onClick={() => fileInputRef?.current.click()}
                 className="absolute bottom-2 right-2 z-10 cursor-pointer"
               />
             </FormControl>

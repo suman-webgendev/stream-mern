@@ -8,7 +8,6 @@ const MyMessage = ({ message, type }) => {
           className="my-1 ml-[25%] max-w-[60%] cursor-pointer rounded-[20px] bg-gradient-to-b from-[#00D0EA] to-[#0085D1] px-4 py-2 text-white"
           style={{ maxHeight: "300px", objectFit: "cover" }}
           onError={(e) => {
-            console.error("Image failed to load:", e);
             e.target.src = "/failedImage.png";
           }}
         />
