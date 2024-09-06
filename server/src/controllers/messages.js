@@ -5,7 +5,7 @@ import { logger } from "../utils/index.js";
 export const sendMessage = async (req, res) => {
   try {
     const currentUser = req.identity._id;
-    const { content, chatId } = req.body;
+    const { content, chatId, type } = req.body;
 
     if (!content || !chatId) {
       return res.status(400).json({ message: "Invalid data" });
@@ -15,6 +15,7 @@ export const sendMessage = async (req, res) => {
       sender: currentUser,
       content,
       chat: chatId,
+      type: type || "text",
     };
 
     let message = await db.Message.create(newMessage);
@@ -31,7 +32,7 @@ export const sendMessage = async (req, res) => {
 
     return res.status(201).json(message);
   } catch (error) {
-    logger.error("[SEND_MESSAGE]", error);
+    console.error("[SEND_MESSAGE]", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

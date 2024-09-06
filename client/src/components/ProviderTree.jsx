@@ -1,7 +1,7 @@
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
 import { BrowserRouter } from "react-router-dom";
 import { ChatProvider } from "./providers/ChatProvider";
 
@@ -15,7 +15,6 @@ const ProviderTree = ({ children }) => {
           <BrowserRouter>
             <ChatProvider>{children}</ChatProvider>
           </BrowserRouter>
-          <ReactQueryDevtools />
         </AuthProvider>
       </ChakraProvider>
     </QueryClientProvider>

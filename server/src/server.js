@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import path from "path";
 import { Server } from "socket.io";
 import { fileURLToPath } from "url";
+import { db } from "./db/index.js";
 import router from "./router/index.js";
 import { logger } from "./utils/index.js";
 
@@ -113,6 +114,38 @@ io.on("connection", (socket) => {
 
       socket.in(user._id).emit("message received", newMessageReceived);
     });
+  });
+
+  socket.on("image upload", async (data) => {
+    const { imageData, filename, userId, chatId } = data;
+    const mimeType = filename.split(".")[1];
+    const finalImage = `data:image/${mimeType};base64,${imageData}`;
+
+    try {
+      let newMessage = {
+        sender: userId,
+        content: finalImage,
+        chat: chatId,
+        type: "image",
+      };
+
+      let message = await db.Message.create(newMessage);
+      message = await message.populate("sender", "name");
+      message = await message.populate("chat");
+      message = await db.User.populate(message, {
+        path: "chat.users",
+        select: "name email",
+      });
+
+      await db.Chat.findByIdAndUpdate(chatId, {
+        lastMessage: message,
+      });
+
+      // Emit the message to all clients in the chat room
+      io.to(chatId).emit("message received", message);
+    } catch (error) {
+      console.error("Error saving image message:", error);
+    }
   });
 
   socket.on("typing", (roomId) => socket.in(roomId).emit("typing"));

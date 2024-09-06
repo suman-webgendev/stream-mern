@@ -12,6 +12,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Paperclip } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import UpdateGroupModal from "../modals/UpdateGroupModal";
@@ -97,6 +98,27 @@ const SingleChat = () => {
     }
   }, [selectedChat, socket, toast]);
 
+  const handleImageUpload = useCallback(
+    async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64String = reader.result.split(",")[1];
+
+          socket.emit("image upload", {
+            imageData: base64String,
+            filename: file.name,
+            userId: user._id,
+            chatId: selectedChat._id,
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    [selectedChat, socket, user],
+  );
+
   useEffect(() => {
     fetchMessages();
 
@@ -111,52 +133,59 @@ const SingleChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const sendMessage = async (event) => {
-    if (event.key === "Enter" && newMessage) {
-      socket.emit("stopped typing", selectedChat._id);
-      try {
-        const { data } = await api.post("/api/chat/message", {
-          content: newMessage,
-          chatId: selectedChat._id,
-        });
-        socket.emit("new message", data);
-        setMessages([...messages, data]);
-        setNewMessage("");
-      } catch (error) {
-        toast({
-          title: "Failed to send the Message",
-          description: error.stack,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          position: "bottom",
-        });
+  const sendMessage = useCallback(
+    async (event) => {
+      if (event.key === "Enter" && newMessage) {
+        socket.emit("stopped typing", selectedChat._id);
+        try {
+          const { data } = await api.post("/api/chat/message", {
+            content: newMessage,
+            chatId: selectedChat._id,
+            type: "text",
+          });
+          socket.emit("new message", data);
+          setMessages([...messages, data]);
+          setNewMessage("");
+        } catch (error) {
+          toast({
+            title: "Failed to send the Message",
+            description: error.stack,
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom",
+          });
+        }
       }
-    }
-  };
+    },
+    [messages, newMessage, selectedChat, socket, toast],
+  );
 
-  const typingHandler = (e) => {
-    setNewMessage(e.target.value);
+  const typingHandler = useCallback(
+    (e) => {
+      setNewMessage(e.target.value);
 
-    if (!isSocketConnected) return;
+      if (!isSocketConnected) return;
 
-    if (!typing) {
-      setTyping(true);
-      socket?.emit("typing", selectedChat._id);
-    }
-
-    let lastTypingTime = new Date().getTime();
-    let timerLength = 3000;
-    setTimeout(() => {
-      let timeNow = new Date().getTime();
-      let timeDiff = timeNow - lastTypingTime;
-
-      if (timeDiff >= timerLength && typing) {
-        socket?.emit("stopped typing", selectedChat._id);
-        setTyping(false);
+      if (!typing) {
+        setTyping(true);
+        socket?.emit("typing", selectedChat._id);
       }
-    }, timerLength);
-  };
+
+      let lastTypingTime = new Date().getTime();
+      let timerLength = 3000;
+      setTimeout(() => {
+        let timeNow = new Date().getTime();
+        let timeDiff = timeNow - lastTypingTime;
+
+        if (timeDiff >= timerLength && typing) {
+          socket?.emit("stopped typing", selectedChat._id);
+          setTyping(false);
+        }
+      }, timerLength);
+    },
+    [isSocketConnected, selectedChat, socket, typing],
+  );
 
   const handleEmojiSelect = useCallback((emoji) => {
     if (inputRef.current) {
@@ -225,9 +254,15 @@ const SingleChat = () => {
                   messages.map((message) => (
                     <div key={message._id}>
                       {message.sender._id === user._id ? (
-                        <MyMessage message={message.content} />
+                        <MyMessage
+                          message={message.content}
+                          type={message.type || "text"}
+                        />
                       ) : (
-                        <YourMessage message={message.content} />
+                        <YourMessage
+                          message={message.content}
+                          type={message.type || "text"}
+                        />
                       )}
                     </div>
                   ))}
@@ -244,12 +279,24 @@ const SingleChat = () => {
                 onChange={typingHandler}
                 value={newMessage}
                 pl="2.2rem"
+                pr="2.2rem"
                 autoFocus
                 autoComplete="off"
               />
               <div className="absolute bottom-2 left-2">
                 <EmojiPicker onEmojiSelect={handleEmojiSelect} />
               </div>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                display="none"
+                id="image-upload"
+              />
+              <Paperclip
+                onClick={() => document.getElementById("image-upload").click()}
+                className="absolute bottom-2 right-2 z-10 cursor-pointer"
+              />
             </FormControl>
           </Box>
         </>
@@ -268,4 +315,5 @@ const SingleChat = () => {
     </>
   );
 };
+
 export default SingleChat;
