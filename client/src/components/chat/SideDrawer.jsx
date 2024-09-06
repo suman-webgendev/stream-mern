@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
-import { api } from "@/lib/utils";
+import { api, getSender } from "@/lib/utils";
 import { BellIcon } from "@chakra-ui/icons";
 import {
   Avatar,
@@ -15,6 +15,8 @@ import {
   Input,
   Menu,
   MenuButton,
+  MenuItem,
+  MenuList,
   Spinner,
   Text,
   Tooltip,
@@ -23,8 +25,10 @@ import {
 } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ProfileModal from "../modals/ProfileModal";
 import ChatLoading from "./ChatLoading";
+import NotificationBadge from "./NotificationBadge";
 import UserListItem from "./UserListItem";
 
 const SideDrawer = () => {
@@ -33,7 +37,31 @@ const SideDrawer = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { user } = useAuth();
   const toast = useToast();
-  const { chats, setChats, setSelectedChat } = useChat();
+  const { chats, setChats, setSelectedChat, notifications, setNotifications } =
+    useChat();
+  const debouncedSearch = useDebounce(search);
+
+  useEffect(() => {
+    if ("Notification" in window) Notification.requestPermission();
+  }, []);
+
+  useEffect(() => {
+    if (
+      notifications.length > 0 &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      const latestNotification = notifications[notifications.length - 1];
+      const sender = latestNotification.chat.isGroupChat
+        ? latestNotification.chat.chatName
+        : getSender(user, latestNotification.chat.users);
+
+      new Notification(`New Message from ${sender}`, {
+        body: `Message: ${latestNotification.content}`,
+        icon: "/chat.png",
+      });
+    }
+  }, [notifications, user]);
 
   const { mutateAsync: accessChat, isPending: loadingChats } = useMutation({
     mutationFn: async (userId) => {
@@ -59,8 +87,6 @@ const SideDrawer = () => {
       onClose();
     },
   });
-
-  const debouncedSearch = useDebounce(search);
 
   const {
     mutateAsync: searchUsers,
@@ -127,19 +153,42 @@ const SideDrawer = () => {
         <Text fontSize="2xl" fontWeight="bold">
           Let&apos;s Chat
         </Text>
-        <div>
+        <div className="flex items-center">
           <Menu>
             <MenuButton p={1}>
-              <BellIcon fontSize="2xl" m={1} />
+              <NotificationBadge count={notifications?.length}>
+                <BellIcon fontSize="2xl" m={1} />
+              </NotificationBadge>
             </MenuButton>
-            {/* <MenuList></MenuList> */}
+            <MenuList p={2}>
+              {!notifications.length
+                ? "No new messages"
+                : notifications.map((notification) => (
+                    <MenuItem
+                      key={notification._id}
+                      onClick={() => {
+                        setSelectedChat(notification.chat);
+                        setNotifications(
+                          notifications.filter((n) => n !== notification),
+                        );
+                      }}
+                    >
+                      {notification.chat.isGroupChat
+                        ? `${notification.chat.chatName}: ${notification.content}`
+                        : `${getSender(user, notification.chat.users)}: ${notification.content}`}
+                    </MenuItem>
+                  ))}
+            </MenuList>
           </Menu>
-          <Avatar
-            size="sm"
-            cursor="pointer"
-            name={user?.name}
-            alignItems="center"
-          />
+
+          <ProfileModal user={user}>
+            <Avatar
+              size="sm"
+              cursor="pointer"
+              name={user?.name}
+              alignItems="center"
+            />
+          </ProfileModal>
         </div>
       </Box>
       <Drawer placement="left" onClose={onClose} isOpen={isOpen}>

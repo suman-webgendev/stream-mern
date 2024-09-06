@@ -11,6 +11,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import UpdateGroupModal from "../modals/UpdateGroupModal";
@@ -23,7 +24,8 @@ const ENDPOINT = import.meta.env.VITE_APT_BASE_URL;
 let selectedChatCompare;
 
 const SingleChat = () => {
-  const { selectedChat, setSelectedChat } = useChat();
+  const { selectedChat, setSelectedChat, notifications, setNotifications } =
+    useChat();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
@@ -35,21 +37,20 @@ const SingleChat = () => {
   const toast = useToast();
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const newSocket = io(ENDPOINT);
     setSocket(newSocket);
 
-    newSocket.on("connected", () => setIsSocketConnected(true));
+    newSocket?.on("connected", () => setIsSocketConnected(true));
 
-    newSocket.emit("setup", user);
-    newSocket.on("typing", () => setIsTyping(true));
-    newSocket.on("stopped typing", () => setIsTyping(false));
+    newSocket?.emit("setup", user);
+    newSocket?.on("typing", () => setIsTyping(true));
+    newSocket?.on("stopped typing", () => setIsTyping(false));
     return () => {
-      newSocket.off("setup", () => {
-        console.log("User disconnected");
-      });
-      newSocket.disconnect();
+      newSocket?.off("setup", () => {});
+      newSocket?.disconnect();
     };
   }, [user]);
 
@@ -61,16 +62,19 @@ const SingleChat = () => {
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessageReceived.chat._id
       ) {
-        // Notification logic here
+        if (!notifications.includes(newMessageReceived)) {
+          setNotifications([newMessageReceived, ...notifications]);
+          queryClient.invalidateQueries({ queryKey: ["AllChats"] });
+        }
       } else {
         setMessages((prevMessages) => [...prevMessages, newMessageReceived]);
       }
     });
 
     return () => {
-      socket.off("message received");
+      socket?.off("message received");
     };
-  }, [socket, selectedChat]);
+  }, [socket, selectedChat, notifications, setNotifications, queryClient]);
 
   const fetchMessages = useCallback(async () => {
     if (!selectedChat) return;
@@ -80,7 +84,7 @@ const SingleChat = () => {
       const { data } = await api.get(`/api/chat/message/${selectedChat._id}`);
       setMessages(data);
       setLoading(false);
-      socket.emit("join chat", selectedChat._id);
+      socket?.emit("join chat", selectedChat._id);
     } catch (error) {
       toast({
         title: "Failed to Load the Messages",
@@ -138,7 +142,7 @@ const SingleChat = () => {
 
     if (!typing) {
       setTyping(true);
-      socket.emit("typing", selectedChat._id);
+      socket?.emit("typing", selectedChat._id);
     }
 
     let lastTypingTime = new Date().getTime();
@@ -148,7 +152,7 @@ const SingleChat = () => {
       let timeDiff = timeNow - lastTypingTime;
 
       if (timeDiff >= timerLength && typing) {
-        socket.emit("stopped typing", selectedChat._id);
+        socket?.emit("stopped typing", selectedChat._id);
         setTyping(false);
       }
     }, timerLength);
@@ -163,7 +167,6 @@ const SingleChat = () => {
       const newText = text.substring(0, start) + emoji + text.substring(end);
       setNewMessage(newText);
       input.setSelectionRange(start + emoji.length, start + emoji.length);
-      input.focus();
     }
   }, []);
 
