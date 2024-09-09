@@ -95,7 +95,12 @@ const MyChats = () => {
                   <div className="flex items-center space-x-2">
                     <Avatar name={chat.lastMessage.sender?.name} size="sm" />
                     <Text>
-                      <span>{chat.lastMessage.sender?.name}: </span>
+                      <span>
+                        {chat.lastMessage.sender?.name === user.name
+                          ? "Me"
+                          : chat.lastMessage.sender?.name}
+                        :
+                      </span>
                       {chat?.lastMessage?.content.includes("data:image/")
                         ? "Photo"
                         : chat?.lastMessage?.content}
