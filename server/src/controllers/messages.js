@@ -49,8 +49,7 @@ export const allMessages = async (req, res) => {
       .populate("sender", "name email")
       .populate("chat")
       .skip(skip)
-      .limit(limit)
-      .sort([["createdAt", -1]]);
+      .limit(limit);
 
     const totalMessages = await db.Message.countDocuments({
       chat: req.params.chatId,

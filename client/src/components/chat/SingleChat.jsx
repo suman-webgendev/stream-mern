@@ -67,7 +67,6 @@ const SingleChat = () => {
     });
 
     newSocket?.on("reconnect", () => {
-      console.log("Socket reconnected, stopping polling");
       setIsPolling(false);
       setSocketStatus("live");
     });
