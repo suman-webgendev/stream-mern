@@ -47,6 +47,8 @@ const SingleChat = () => {
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
+  const typingTimeoutRef = useRef(null);
+
   useEffect(() => {
     const newSocket = io(ENDPOINT);
     setSocket(newSocket);
@@ -210,11 +212,16 @@ const SingleChat = () => {
         socket?.emit("typing", selectedChat._id);
       }
 
-      let lastTypingTime = new Date().getTime();
-      let timerLength = 3000;
-      setTimeout(() => {
-        let timeNow = new Date().getTime();
-        let timeDiff = timeNow - lastTypingTime;
+      const currentTypingTime = new Date().getTime();
+      const timerLength = 3000;
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        const timeNow = new Date().getTime();
+        const timeDiff = timeNow - currentTypingTime;
 
         if (timeDiff >= timerLength && typing) {
           socket?.emit("stopped typing", selectedChat._id);
@@ -224,6 +231,14 @@ const SingleChat = () => {
     },
     [isSocketConnected, selectedChat, socket, typing],
   );
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEmojiSelect = useCallback((emoji) => {
     if (inputRef.current) {
