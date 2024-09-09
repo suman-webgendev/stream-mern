@@ -8,6 +8,7 @@ const VideoList = (props) => {
           key={video.id}
           videoId={video.id}
           imageUrl={video.imageUrl}
+          owner={video.owner.name}
           videoTitle={video.title}
           uploadedAt={video.createdAt}
         />

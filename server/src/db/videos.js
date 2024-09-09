@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const videoSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
+  },
   title: { type: String, required: true },
   path: { type: String, required: true },
   imageUrl: String,

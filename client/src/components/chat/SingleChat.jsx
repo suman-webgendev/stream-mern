@@ -3,6 +3,7 @@ import { useChat } from "@/hooks/useChat";
 import { api, getSender } from "@/lib/utils";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import {
+  Badge,
   Box,
   FormControl,
   IconButton,
@@ -31,6 +32,8 @@ const SingleChat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [socketStatus, setSocketStatus] = useState("live");
+  const [isPolling, setIsPolling] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -45,11 +48,33 @@ const SingleChat = () => {
     const newSocket = io(ENDPOINT);
     setSocket(newSocket);
 
-    newSocket?.on("connected", () => setIsSocketConnected(true));
+    newSocket?.on("connected", () => {
+      setIsSocketConnected(true);
+      setIsPolling(false);
+      setSocketStatus("live");
+    });
 
     newSocket?.emit("setup", user);
     newSocket?.on("typing", () => setIsTyping(true));
     newSocket?.on("stopped typing", () => setIsTyping(false));
+
+    newSocket?.on("disconnect", () => {
+      setIsPolling(true);
+      setSocketStatus("polling");
+    });
+
+    newSocket?.on("reconnect", () => {
+      console.log("Socket reconnected, stopping polling");
+      setIsPolling(false);
+      setSocketStatus("live");
+    });
+
+    newSocket?.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      setSocketStatus("polling");
+      setIsPolling(true);
+    });
+
     return () => {
       newSocket?.off("setup", () => {});
       newSocket?.disconnect();
@@ -204,6 +229,28 @@ const SingleChat = () => {
     }
   }, []);
 
+  const pollMessages = useCallback(async () => {
+    try {
+      const { data } = await api.get(`/api/chat/message/${selectedChat._id}`);
+      setMessages(...messages, data);
+    } catch (error) {
+      console.error("Error while polling messages:", error);
+    }
+  }, [selectedChat, messages]);
+
+  useEffect(() => {
+    let pollingInterval;
+    if (isPolling) {
+      pollingInterval = setInterval(() => {
+        pollMessages();
+      }, 5000);
+    }
+
+    return () => {
+      if (pollingInterval) clearInterval(pollingInterval);
+    };
+  }, [isPolling, pollMessages]);
+
   return (
     <>
       {selectedChat ? (
@@ -222,6 +269,7 @@ const SingleChat = () => {
               icon={<ArrowBackIcon />}
               onClick={() => setSelectedChat("")}
             />
+
             {!selectedChat.isGroupChat ? (
               <>{getSender(user, selectedChat.users)}</>
             ) : (
@@ -230,6 +278,16 @@ const SingleChat = () => {
                 <UpdateGroupModal />
               </>
             )}
+            <Badge
+              variant="solid"
+              colorScheme={socketStatus === "live" ? "green" : "orange"}
+              ml={1}
+              px={2}
+              py={0.5}
+              borderRadius="10px"
+            >
+              {socketStatus}
+            </Badge>
           </Text>
           <Box
             display="flex"

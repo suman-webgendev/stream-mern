@@ -86,7 +86,7 @@ const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
     origin: [process.env.CLIENT_URL],
-    methods: ["GET", "POST", "PUT"],
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
@@ -141,7 +141,6 @@ io.on("connection", (socket) => {
         lastMessage: message,
       });
 
-      // Emit the message to all clients in the chat room
       io.to(chatId).emit("message received", message);
     } catch (error) {
       console.error("Error saving image message:", error);

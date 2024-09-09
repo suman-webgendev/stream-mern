@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
+import { Avatar } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 const VideoCard = (props) => {
@@ -7,7 +8,11 @@ const VideoCard = (props) => {
 
   const handleClick = () => {
     navigate("/video-details", {
-      state: { videoId: props.videoId, title: props.videoTitle },
+      state: {
+        videoId: props.videoId,
+        title: props.videoTitle,
+        owner: props.owner,
+      },
     });
   };
 
@@ -28,8 +33,14 @@ const VideoCard = (props) => {
             }}
           />
         </div>
+
         <div className="overflow-x grid h-32 w-full max-w-screen-md grid-rows-3 space-y-3">
           <p className="row-span-2 text-pretty text-lg">{props.videoTitle}</p>
+
+          <div className="flex items-center space-x-1">
+            <Avatar name={props.owner} size="sm" />
+            <p>{props.owner}</p>
+          </div>
           <p className="row-span-1 text-muted-foreground">
             {formatDate(props.uploadedAt)}
           </p>

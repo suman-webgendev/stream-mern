@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 
 const VideoPage = () => {
   const location = useLocation();
-  const { title, videoId } = location.state || {};
+  const { title, videoId, owner } = location.state || {};
 
   return (
     <>
@@ -15,7 +15,7 @@ const VideoPage = () => {
           <VideoPlayer videoId={videoId} />
         </Suspense>
       </div>
-      <VideoTitle title={title} />
+      <VideoTitle title={title} owner={owner} />
     </>
   );
 };

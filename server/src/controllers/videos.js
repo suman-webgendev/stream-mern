@@ -18,6 +18,7 @@ const upload = multer({
 //! Video upload
 export const uploadVideo = async (req, res) => {
   const uploadSingle = promisify(upload.single("video"));
+  const currentUser = req.identity._id;
 
   try {
     await uploadSingle(req, res);
@@ -39,6 +40,7 @@ export const uploadVideo = async (req, res) => {
     const videoData = {
       title,
       path: videoPath,
+      owner: currentUser,
       imageUrl: thumbnailPath,
     };
 
@@ -80,6 +82,7 @@ export const getAllVideos = async (req, res) => {
           id: video._id,
           title: video.title,
           imageUrl: imageData,
+          owner: video.owner,
           createdAt: video.createdAt,
           updatedAt: video.updatedAt,
         };
