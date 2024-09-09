@@ -13,7 +13,7 @@
     "dev": "concurrently \"pnpm run server:dev\" \"pnpm run client:dev\"",
     "build:start": "sudo docker compose up --build ",
     "start": "concurrently \"pnpm run server:start\" \"pnpm run client:start\"",
-    "docker:start": "sudo docker compose up",
+    "docker:start": "sudo docker compose up --no-build",
     "clear": "concurrently \"pnpm run server:clear\" \"pnpm run client:clear\""
   },
   "keywords": [],
