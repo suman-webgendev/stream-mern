@@ -40,13 +40,31 @@ export const sendMessage = async (req, res) => {
 //! Fetch all the message for a particular chat
 export const allMessages = async (req, res) => {
   try {
-    const messages = await db.Message.find({
-      chat: req.params.chatId,
-    })
-      .populate("sender", "name email")
-      .populate("chat");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
 
-    return res.json(messages);
+    const skip = (page - 1) * limit;
+
+    const messages = await db.Message.find({ chat: req.params.chatId })
+      .populate("sender", "name email")
+      .populate("chat")
+      .skip(skip)
+      .limit(limit)
+      .sort([["createdAt", -1]]);
+
+    const totalMessages = await db.Message.countDocuments({
+      chat: req.params.chatId,
+    });
+
+    return res.json({
+      messages,
+      pagination: {
+        totalMessages,
+        totalPages: Math.ceil(totalMessages / limit),
+        currentPage: page,
+        pageSize: limit,
+      },
+    });
   } catch (error) {
     logger.error("[FETCHING_MESSAGE_FOR_A_USER]", error);
     return res.status(500).json({ message: "Internal server error" });

@@ -13,7 +13,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Paperclip } from "lucide-react";
+import { ArrowUp, Paperclip } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import UpdateGroupModal from "../modals/UpdateGroupModal";
@@ -33,6 +33,9 @@ const SingleChat = () => {
   const [socket, setSocket] = useState(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [socketStatus, setSocketStatus] = useState("live");
+  const [, setPaginationData] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [isPolling, setIsPolling] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -108,8 +111,13 @@ const SingleChat = () => {
 
     try {
       setLoading(true);
-      const { data } = await api.get(`/api/chat/message/${selectedChat._id}`);
-      setMessages(data);
+      const { data } = await api.get(
+        `/api/chat/message/${selectedChat._id}?page=${currentPage}&limit=20`,
+      );
+
+      setMessages((prevMessages) => [...data.messages, ...prevMessages]);
+      setPaginationData(data.pagination);
+      setTotalPages(data.pagination.totalPages);
       setLoading(false);
       socket?.emit("join chat", selectedChat._id);
     } catch (error) {
@@ -122,7 +130,7 @@ const SingleChat = () => {
         position: "bottom",
       });
     }
-  }, [selectedChat, socket, toast]);
+  }, [selectedChat, socket, toast, currentPage]);
 
   const handleImageUpload = useCallback(
     async (event) => {
@@ -176,6 +184,7 @@ const SingleChat = () => {
           socket.emit("new message", data);
           setMessages([...messages, data]);
           setNewMessage("");
+          await queryClient.invalidateQueries({ queryKey: ["AllChats"] });
         } catch (error) {
           toast({
             title: "Failed to send the Message",
@@ -188,7 +197,7 @@ const SingleChat = () => {
         }
       }
     },
-    [messages, newMessage, selectedChat, socket, toast],
+    [messages, newMessage, selectedChat, socket, toast, queryClient],
   );
 
   const typingHandler = useCallback(
@@ -231,12 +240,15 @@ const SingleChat = () => {
 
   const pollMessages = useCallback(async () => {
     try {
-      const { data } = await api.get(`/api/chat/message/${selectedChat._id}`);
-      setMessages(...messages, data);
+      const { data } = await api.get(
+        `/api/chat/message/${selectedChat._id}?page=${currentPage}&limit=20`,
+      );
+      setMessages((prevMessages) => [...data.messages, ...prevMessages]);
+      setPaginationData(data.pagination);
     } catch (error) {
       console.error("Error while polling messages:", error);
     }
-  }, [selectedChat, messages]);
+  }, [selectedChat, currentPage]);
 
   useEffect(() => {
     let pollingInterval;
@@ -250,6 +262,14 @@ const SingleChat = () => {
       if (pollingInterval) clearInterval(pollingInterval);
     };
   }, [isPolling, pollMessages]);
+
+  const isLastPage = currentPage === totalPages;
+
+  const loadMoreMessages = () => {
+    if (!isLastPage) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
 
   return (
     <>
@@ -296,7 +316,7 @@ const SingleChat = () => {
             p={3}
             bg="#e8e8e8"
             w="100%"
-            h="100%"
+            h="86%"
             borderRadius="lg"
             overflowY="hidden"
           >
@@ -313,6 +333,18 @@ const SingleChat = () => {
                 className="flex scroll-m-1 flex-col overflow-y-scroll"
                 style={{ scrollbarWidth: "none" }}
               >
+                {!isLastPage && (
+                  <button
+                    className="mx-auto flex w-fit items-center space-x-4 rounded-lg bg-[#cacaca]/60 px-1"
+                    onClick={loadMoreMessages}
+                  >
+                    Load more messages
+                    <span>
+                      <ArrowUp className="size-6" />
+                    </span>
+                  </button>
+                )}
+
                 {Array.isArray(messages) &&
                   messages.map((message) => (
                     <div key={message._id}>
@@ -332,6 +364,7 @@ const SingleChat = () => {
                 <div ref={messagesEndRef} />
               </div>
             )}
+
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
               {isTyping && <TypingIndicator />}
               <Input

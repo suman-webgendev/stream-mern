@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { api, getSender } from "@/lib/utils";
 import { AddIcon } from "@chakra-ui/icons";
-import { Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import GroupChatModal from "../modals/GroupChatModal";
 import ChatLoading from "./ChatLoading";
@@ -75,7 +75,7 @@ const MyChats = () => {
       >
         {chats ? (
           <Stack overflowY="scroll">
-            {chats.map((chat) => (
+            {chats?.map((chat) => (
               <Box
                 key={chat._id}
                 onClick={() => setSelectedChat(chat)}
@@ -86,11 +86,22 @@ const MyChats = () => {
                 py={2}
                 borderRadius="lg"
               >
-                <Text>
+                <Text ml={2} fontWeight={800} p={2}>
                   {!chat.isGroupChat
                     ? getSender(user, chat.users)
                     : chat.chatName}
                 </Text>
+                {chat?.lastMessage && (
+                  <div className="flex items-center space-x-2">
+                    <Avatar name={chat.lastMessage.sender?.name} size="sm" />
+                    <Text>
+                      <span>{chat.lastMessage.sender?.name}: </span>
+                      {chat?.lastMessage?.content.includes("data:image/")
+                        ? "Photo"
+                        : chat?.lastMessage?.content}
+                    </Text>
+                  </div>
+                )}
               </Box>
             ))}
           </Stack>
