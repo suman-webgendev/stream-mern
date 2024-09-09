@@ -316,7 +316,7 @@ const SingleChat = () => {
             p={3}
             bg="#e8e8e8"
             w="100%"
-            h="86%"
+            h="100%"
             borderRadius="lg"
             overflowY="hidden"
           >
