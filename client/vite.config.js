@@ -12,6 +12,8 @@ export default defineConfig({
   preview: {
     port: 3000,
     strictPort: true,
+    host: true,
+    origin: "http://0.0.0.0:3000",
   },
   server: {
     port: 3000,

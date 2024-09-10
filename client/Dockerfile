@@ -32,4 +32,4 @@ ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD ["pnpm", "run", "start", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["pnpm", "run", "start"]
