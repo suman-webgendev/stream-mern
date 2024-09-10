@@ -1,3 +1,5 @@
+import UserBadgeItem from "@/components/chat/UserBadgeItem";
+import UserListItem from "@/components/chat/UserListItem";
 import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/utils";
@@ -18,9 +20,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
-import UserBadgeItem from "../chat/UserBadgeItem";
-import UserListItem from "../chat/UserListItem";
+import { useCallback, useEffect, useState } from "react";
 
 const GroupChatModal = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -100,13 +100,12 @@ const GroupChatModal = ({ children }) => {
     [selectedUsers, toast],
   );
 
-  const debouncedInput = useDebounce(searchQuery);
+  const debouncedInput = useDebounce(searchQuery, 300);
 
   const { mutateAsync: search, isPending } = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.get(
-        `/api/chat/find-user?search=${debouncedInput}`,
-      );
+    mutationFn: async (query) => {
+      if (!query) return [];
+      const { data } = await api.get(`/api/chat/find-user?search=${query}`);
       return data;
     },
     onSuccess: (data) => {
@@ -124,14 +123,17 @@ const GroupChatModal = ({ children }) => {
     },
   });
 
-  const handleSearch = useCallback(
-    (query) => {
-      if (!query) return;
-      setSearchQuery(query);
-      search();
-    },
-    [search],
-  );
+  useEffect(() => {
+    if (debouncedInput) {
+      search(debouncedInput);
+    } else {
+      setSearchResults([]);
+    }
+  }, [debouncedInput, search]);
+
+  const handleSearch = useCallback((query) => {
+    setSearchQuery(query);
+  }, []);
 
   return (
     <>
@@ -173,6 +175,7 @@ const GroupChatModal = ({ children }) => {
             {isPending ? (
               <Spinner size="lg" />
             ) : (
+              searchResults.length > 0 &&
               searchResults
                 ?.slice(0, 4)
                 .map((user) => (

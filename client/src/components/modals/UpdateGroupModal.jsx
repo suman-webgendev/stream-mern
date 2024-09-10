@@ -23,7 +23,7 @@ import {
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const UpdateGroupModal = () => {
   const [groupChatName, setGroupChatName] = useState("");
@@ -36,13 +36,12 @@ const UpdateGroupModal = () => {
   const { user: currentUser } = useAuth();
   const toast = useToast();
 
-  const debouncedInput = useDebounce(searchQuery);
+  const debouncedInput = useDebounce(searchQuery, 300);
 
   const { mutateAsync: search, isPending: isLoadingSearch } = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.get(
-        `/api/chat/find-user?search=${debouncedInput}`,
-      );
+    mutationFn: async (query) => {
+      if (!query) return [];
+      const { data } = await api.get(`/api/chat/find-user?search=${query}`);
       return data;
     },
     onSuccess: (data) => {
@@ -140,14 +139,17 @@ const UpdateGroupModal = () => {
     },
   });
 
-  const handleSearch = useCallback(
-    (query) => {
-      if (!query) return;
-      setSearchQuery(query);
-      search();
-    },
-    [search],
-  );
+  useEffect(() => {
+    if (debouncedInput) {
+      search(debouncedInput);
+    } else {
+      setSearchResults([]);
+    }
+  }, [debouncedInput, search]);
+
+  const handleSearch = useCallback((query) => {
+    setSearchQuery(query);
+  }, []);
 
   const handleGroup = useCallback(
     (userToAdd) => {
@@ -261,6 +263,7 @@ const UpdateGroupModal = () => {
             {isLoadingSearch ? (
               <Spinner size="lg" />
             ) : (
+              searchResults.length > 0 &&
               searchResults
                 ?.slice(0, 4)
                 .map((user) => (

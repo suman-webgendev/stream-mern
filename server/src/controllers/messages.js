@@ -37,31 +37,62 @@ export const sendMessage = async (req, res) => {
   }
 };
 
+//! Fetch all the message for a particular chat without pagination
+// export const allMessages = async (req, res) => {
+//   try {
+//     const messages = await db.Message.find({ chat: req.params.chatId })
+//       .populate("sender", "name email")
+//       .populate("chat")
+//       .sort({ createdAt: 1 });
+
+//     const totalMessages = await db.Message.countDocuments({
+//       chat: req.params.chatId,
+//     });
+
+//     return res.json({
+//       messages,
+//     });
+//   } catch (error) {
+//     logger.error("[FETCHING_MESSAGE_FOR_A_USER]", error);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
 //! Fetch all the message for a particular chat with pagination
 export const allMessages = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    const page = Number.isNaN(parseInt(req.query.page))
+      ? 1
+      : parseInt(req.query.page);
     const limit = 20;
-
-    const skip = (page - 1) * limit;
-
-    const messages = await db.Message.find({ chat: req.params.chatId })
-      .populate("sender", "name email")
-      .populate("chat")
-      .skip(skip)
-      .limit(limit);
-
     const totalMessages = await db.Message.countDocuments({
       chat: req.params.chatId,
     });
+
+    const totalPages = Math.ceil(totalMessages / limit);
+
+    if (page < 1 || (page > totalPages && totalMessages > 0)) {
+      return res.status(400).json({
+        message: `Invalid page number. Valid range: 1 to ${totalPages}`,
+      });
+    }
+
+    const skip = (totalPages - page) * limit;
+
+    const messages = await db.Message.find({ chat: req.params.chatId })
+      .populate("sender", "name email")
+      .sort({ createdAt: 1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.json({
       messages,
       pagination: {
         totalMessages,
-        totalPages: Math.ceil(totalMessages / limit),
+        totalPages,
         currentPage: page,
         pageSize: limit,
+        hasNextPage: page < totalPages,
       },
     });
   } catch (error) {

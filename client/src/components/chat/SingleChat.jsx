@@ -1,3 +1,4 @@
+import UpdateGroupModal from "@/components/modals/UpdateGroupModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { api, getSender } from "@/lib/utils";
@@ -16,13 +17,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowUp, Paperclip } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
-import UpdateGroupModal from "../modals/UpdateGroupModal";
 import EmojiPicker from "./EmojiPicker";
 import MyMessage from "./MyMessage";
 import TypingIndicator from "./TypingIndicator";
 import YourMessage from "./YourMessage";
 
-const ENDPOINT = import.meta.env.VITE_APT_BASE_URL;
 let selectedChatCompare;
 
 const SingleChat = () => {
@@ -50,7 +49,7 @@ const SingleChat = () => {
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
-    const newSocket = io(ENDPOINT);
+    const newSocket = io(import.meta.env.VITE_APT_BASE_URL);
     setSocket(newSocket);
 
     newSocket?.on("connected", () => {
@@ -257,7 +256,14 @@ const SingleChat = () => {
       const { data } = await api.get(
         `/api/chat/message/${selectedChat._id}?page=${currentPage}`,
       );
-      setMessages((prevMessages) => [...data.messages, ...prevMessages]);
+
+      setMessages((prevMessages) => {
+        const newMessages = data.messages.filter(
+          (newMsg) => !prevMessages.some((msg) => msg._id === newMsg._id),
+        );
+
+        return [...newMessages, ...prevMessages];
+      });
       setPaginationData(data.pagination);
     } catch (error) {
       console.error("Error while polling messages:", error);
@@ -278,6 +284,7 @@ const SingleChat = () => {
   }, [isPolling, pollMessages]);
 
   const isLastPage = currentPage === totalPages;
+  const hasNextPage = currentPage < totalPages;
 
   const loadMoreMessages = () => {
     if (!isLastPage) {
@@ -347,9 +354,9 @@ const SingleChat = () => {
                 className="flex scroll-m-1 flex-col overflow-y-scroll"
                 style={{ scrollbarWidth: "none" }}
               >
-                {!isLastPage && (
+                {!isLastPage && hasNextPage && (
                   <button
-                    className="mx-auto flex w-fit items-center space-x-4 rounded-lg bg-[#cacaca]/60 px-1"
+                    className="mx-auto flex w-fit items-center gap-x-3 rounded-lg bg-[#cacaca]/60 px-1"
                     onClick={loadMoreMessages}
                   >
                     Load more messages

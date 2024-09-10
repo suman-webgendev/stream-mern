@@ -1,10 +1,10 @@
+import GroupChatModal from "@/components/modals/GroupChatModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { api, getSender } from "@/lib/utils";
 import { AddIcon } from "@chakra-ui/icons";
 import { Avatar, Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import GroupChatModal from "../modals/GroupChatModal";
 import ChatLoading from "./ChatLoading";
 
 const MyChats = () => {
@@ -16,7 +16,7 @@ const MyChats = () => {
     queryKey: ["AllChats"],
     queryFn: async () => {
       const { data } = await api.get("/api/chat");
-      setChats(data);
+      setChats(Array.isArray(data) ? data : []);
       return data;
     },
   });
@@ -73,7 +73,7 @@ const MyChats = () => {
         borderRadius="lg"
         overflowY="hidden"
       >
-        {chats ? (
+        {Array.isArray(chats) && chats.length > 0 ? (
           <Stack overflowY="scroll">
             {chats?.map((chat) => (
               <Box
@@ -103,7 +103,8 @@ const MyChats = () => {
                       </span>
                       {chat?.lastMessage?.content.includes("data:image/")
                         ? "Photo"
-                        : chat?.lastMessage?.content}
+                        : chat?.lastMessage?.content.slice(0, 6) +
+                          (chat?.lastMessage?.content.length > 6 ? "..." : "")}
                     </Text>
                   </div>
                 )}

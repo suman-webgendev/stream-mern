@@ -1,3 +1,4 @@
+import ProfileModal from "@/components/modals/ProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -26,7 +27,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import ProfileModal from "../modals/ProfileModal";
 import ChatLoading from "./ChatLoading";
 import NotificationBadge from "./NotificationBadge";
 import UserListItem from "./UserListItem";
