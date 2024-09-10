@@ -102,7 +102,7 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-const logFilePath = path.join(logsDir, `${getTodaysDate()}.txt`);
+const logFilePath = path.join(logsDir, `${getTodaysDate()}.log`);
 
 const writeLogToFile = async (level, message) => {
   const logMessage = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${message}\n`;
