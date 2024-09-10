@@ -113,7 +113,7 @@ const SingleChat = () => {
     try {
       setLoading(true);
       const { data } = await api.get(
-        `/api/chat/message/${selectedChat._id}?page=${currentPage}&limit=20`,
+        `/api/chat/message/${selectedChat._id}?page=${currentPage}`,
       );
 
       setMessages((prevMessages) => [...data.messages, ...prevMessages]);
@@ -255,7 +255,7 @@ const SingleChat = () => {
   const pollMessages = useCallback(async () => {
     try {
       const { data } = await api.get(
-        `/api/chat/message/${selectedChat._id}?page=${currentPage}&limit=20`,
+        `/api/chat/message/${selectedChat._id}?page=${currentPage}`,
       );
       setMessages((prevMessages) => [...data.messages, ...prevMessages]);
       setPaginationData(data.pagination);

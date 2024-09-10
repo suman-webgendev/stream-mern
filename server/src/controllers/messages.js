@@ -37,11 +37,11 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-//! Fetch all the message for a particular chat
+//! Fetch all the message for a particular chat with pagination
 export const allMessages = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 15;
+    const limit = 20;
 
     const skip = (page - 1) * limit;
 

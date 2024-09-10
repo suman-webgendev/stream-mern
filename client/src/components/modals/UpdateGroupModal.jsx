@@ -1,5 +1,9 @@
+import UserBadgeItem from "@/components/chat/UserBadgeItem";
+import UserListItem from "@/components/chat/UserListItem";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
+import { useDebounce } from "@/hooks/useDebounce";
+import { api } from "@/lib/utils";
 import {
   Box,
   Button,
@@ -20,10 +24,6 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useDebounce } from "../../hooks/useDebounce";
-import { api } from "../../lib/utils";
-import UserBadgeItem from "../chat/UserBadgeItem";
-import UserListItem from "../chat/UserListItem";
 
 const UpdateGroupModal = () => {
   const [groupChatName, setGroupChatName] = useState("");
