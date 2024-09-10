@@ -1,33 +1,35 @@
-
+# Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json pnpm-lock.yaml ./
+RUN npm install -g pnpm
 
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# Build the React app
 RUN pnpm run build
 
-# Stage 2: Serve the app with pnpm
+# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install pnpm globally in the final image
 RUN npm install -g pnpm
 
-COPY --from=builder /app /app
+COPY --from=builder /app/dist ./dist
 
-# Ensure correct permissions for the 'app' user
-RUN addgroup app && adduser -S -G app app && chown -R app:app /app
+COPY --from=builder /app/package.json ./
 
-USER app
+COPY --from=builder /app/pnpm-lock.yaml ./
+
+RUN pnpm install --prod
+
+ENV NODE_ENV=production
 
 EXPOSE 3000
 
-# Start the React app using pnpm
-CMD ["pnpm", "run", "start"]
+CMD ["pnpm", "run", "start", "--host", "0.0.0.0", "--port", "3000"]
