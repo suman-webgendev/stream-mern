@@ -6,6 +6,10 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -88,17 +92,46 @@ export const readImageFile = (imagePath) => {
   });
 };
 
+const getTodaysDate = () => {
+  const date = new Date();
+  return date.toISOString().split("T")[0];
+};
+
+const logsDir = path.join(__dirname, "../../logs");
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+const logFilePath = path.join(logsDir, `${getTodaysDate()}.txt`);
+
+const writeLogToFile = async (level, message) => {
+  const logMessage = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${message}\n`;
+  try {
+    await fs.promises.appendFile(logFilePath, logMessage);
+  } catch (error) {
+    console.error(colors.red(`Failed to write to log file: ${error.message}`));
+  }
+};
+
 export const logger = {
-  error(...args) {
-    console.log(colors.red(...args));
+  async error(...args) {
+    const message = args.join(" ");
+    console.log(colors.red(message));
+    await writeLogToFile("error", message);
   },
-  warn(...args) {
-    console.log(colors.yellow(...args));
+  async warn(...args) {
+    const message = args.join(" ");
+    console.log(colors.yellow(message));
+    await writeLogToFile("warn", message);
   },
-  info(...args) {
-    console.log(colors.cyan(...args));
+  async info(...args) {
+    const message = args.join(" ");
+    console.log(colors.cyan(message));
+    await writeLogToFile("info", message);
   },
-  success(...args) {
-    console.log(colors.green(...args));
+  async success(...args) {
+    const message = args.join(" ");
+    console.log(colors.green(message));
+    await writeLogToFile("success", message);
   },
 };
