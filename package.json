@@ -1,5 +1,5 @@
 {
-  "name": "stream",
+  "name": "stream-mern",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -9,12 +9,13 @@
     "client:start": "cd client && pnpm run build && pnpm start",
     "server:start": "cd server && pnpm start",
     "client:clear": "cd client && rm -rf node_modules",
-    "docker:clear": "sudo docker system prune -a --volumes",
     "dev": "concurrently \"pnpm run server:dev\" \"pnpm run client:dev\"",
-    "build:start": "sudo docker compose up --build ",
     "start": "concurrently \"pnpm run server:start\" \"pnpm run client:start\"",
-    "docker:start": "sudo docker compose up --no-build",
-    "clear": "concurrently \"pnpm run server:clear\" \"pnpm run client:clear\""
+    "clear": "concurrently \"pnpm run server:clear\" \"pnpm run client:clear\"",
+    "docker:build": "docker compose -f docker-compose.build.yml build",
+    "docker:clear": "sudo docker system prune -a --volumes",
+    "docker:push": "pnpm run docker:build && docker push ghcr.io/suman-webgendev/stream-mern:backend-latest && docker push ghcr.io/suman-webgendev/stream-mern:frontend-latest",
+    "docker:start": "docker compose -f docker-compose.prod.yml up"
   },
   "keywords": [],
   "author": "Suman-JS",
