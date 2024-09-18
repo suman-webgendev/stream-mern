@@ -7,6 +7,7 @@ import multer from "multer";
 import path from "path";
 import sharp from "sharp";
 import { fileURLToPath } from "url";
+import Stripe from "stripe"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -135,3 +136,9 @@ export const logger = {
     await writeLogToFile("success", message);
   },
 };
+
+
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    apiVersion: "2024-06-20",
+});

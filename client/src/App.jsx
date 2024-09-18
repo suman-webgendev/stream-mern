@@ -3,6 +3,7 @@ import Chat from "@/pages/Chat";
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout";
 import Login from "@/pages/Login";
+import PricingPage from "@/pages/PricingPage";
 import Register from "@/pages/Register";
 import VideoPage from "@/pages/VideoPage";
 import { Route, Routes } from "react-router-dom";
@@ -20,6 +21,7 @@ const App = () => {
           <Route index element={<Home />} />
           <Route path="/video-details" element={<VideoPage />} />
           <Route path="/chats" element={<Chat />} />
+          <Route path="/pricing" element={<PricingPage />} />
         </Route>
       </Route>
     </Routes>

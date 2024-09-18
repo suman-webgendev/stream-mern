@@ -37,27 +37,6 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-//! Fetch all the message for a particular chat without pagination
-// export const allMessages = async (req, res) => {
-//   try {
-//     const messages = await db.Message.find({ chat: req.params.chatId })
-//       .populate("sender", "name email")
-//       .populate("chat")
-//       .sort({ createdAt: 1 });
-
-//     const totalMessages = await db.Message.countDocuments({
-//       chat: req.params.chatId,
-//     });
-
-//     return res.json({
-//       messages,
-//     });
-//   } catch (error) {
-//     logger.error("[FETCHING_MESSAGE_FOR_A_USER]", error);
-//     return res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
 //! Fetch all the message for a particular chat with pagination
 export const allMessages = async (req, res) => {
   try {

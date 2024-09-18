@@ -64,6 +64,11 @@ const Navbar = () => {
                   Chat
                 </Link>
               </Button>
+              <Button variant="link" disabled={isPending} tabIndex={-1}>
+                <Link to="/pricing" className="text-lg">
+                  Payment
+                </Link>
+              </Button>
               <li>
                 <Button
                   variant="link"
