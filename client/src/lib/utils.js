@@ -60,3 +60,37 @@ export const formatDate = (uploadDate) => {
 export const getSender = (currentUser, users) => {
   return users[0]._id === currentUser._id ? users[1].name : users[0].name;
 };
+
+export const formatPriceData = (apiResponse) => {
+  return apiResponse?.plans
+    .map((plan) => {
+      const annualPriceObj = plan.prices.find(
+        (price) => price.recurring && price.recurring.interval === "year",
+      );
+
+      const monthlyPriceObj = plan.prices.find(
+        (price) => price.recurring && price.recurring.interval === "month",
+      );
+
+      const annualPrice = annualPriceObj ? annualPriceObj.unit_amount / 100 : 0;
+      const monthlyPrice = monthlyPriceObj
+        ? monthlyPriceObj.unit_amount / 100
+        : 0;
+
+      return {
+        id: plan.id,
+        title: plan.name,
+        description: plan.description,
+        features: Object.entries(plan.metadata).map(([, value]) => value),
+        monthlyPriceId: monthlyPriceObj.id,
+        monthlyPrice,
+        annualPriceId: annualPriceObj.id,
+        annualPrice,
+        ...(plan.name === "Premium Plan" && { popular: true }),
+      };
+    })
+    .sort((a, b) => {
+      const order = ["Basic Plan", "Standard Plan", "Premium Plan"];
+      return order.indexOf(a.title) - order.indexOf(b.title);
+    });
+};

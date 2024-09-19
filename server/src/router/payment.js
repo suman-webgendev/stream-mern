@@ -16,5 +16,6 @@ export default (router) => {
     stripeWebhook
   );
 
+  //? Returns all the plans along with the prices
   router.get("/api/subscription/products", isAuthenticated, getAllStripePlans);
 };

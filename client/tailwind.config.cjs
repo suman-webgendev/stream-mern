@@ -87,6 +87,10 @@ module.exports = {
       gridTemplateColumns: {
         video: "256px auto",
       },
+      boxShadow: {
+        "pricing-card": "0 0 2rem transparent",
+        "pricing-card-hover": "0 0 2rem #676565"
+      },
     },
   },
   plugins: [require("tailwindcss-animate"), addVariablesForColors],

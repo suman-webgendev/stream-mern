@@ -10,18 +10,26 @@ dotenv.config();
  * @param {Response} res
  * @returns {JSON}
  */
+
+//! Returns all the plans along with prices (monthly, yearly)
 export const getAllStripePlans = async (req, res) => {
   try {
     const [plans, prices] = await Promise.all([
       stripe.products.list(),
       stripe.prices.list(),
     ]);
-    const plansWithPrice = plans.data.map((plan) => {
-      const pricesOfPlan = prices.data.filter(
-        (price) => price.product === plan.id
-      );
-      return { plan, prices: pricesOfPlan };
-    });
+
+    const plansWithPrice = {
+      plans: plans.data.map((plan) => {
+        const pricesOfPlan = prices.data.filter(
+          (price) => price.product === plan.id
+        );
+        return {
+          ...plan,
+          prices: pricesOfPlan,
+        };
+      }),
+    };
 
     return res.json(plansWithPrice);
   } catch (error) {
