@@ -17,5 +17,5 @@ export default (router) => {
   );
 
   //? Returns all the plans along with the prices
-  router.get("/api/subscription/products", isAuthenticated, getAllStripePlans);
+  router.get("/api/subscription/plans", isAuthenticated, getAllStripePlans);
 };

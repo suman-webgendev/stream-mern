@@ -45,18 +45,14 @@ export const getAllStripePlans = async (req, res) => {
  * @returns {any}
  */
 export const createSubscription = async (req, res) => {
-  const { paymentMethodId, planId } = req.body;
+  const { priceId } = req.body;
   const currentUser = req.identity._id;
   try {
     const user = await getUserById(currentUser);
 
     if (!user.stripeCustomerId) {
       const newCustomer = await stripe.customers.create({
-        payment_method: paymentMethodId,
         email: user.email,
-        invoice_settings: {
-          default_payment_method: paymentMethodId,
-        },
       });
 
       user.stripeCustomerId = newCustomer.id;
@@ -64,19 +60,21 @@ export const createSubscription = async (req, res) => {
       logger.success("New stripe customer created!");
     }
 
-    const subscription = await stripe.subscriptions.create({
+    const session = await stripe.checkout.sessions.create({
       customer: user.stripeCustomerId,
-      items: [{ price: planId }],
-      expand: ["latest_invoice.payment_intent"],
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${process.env.CLIENT_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/subscription/canceled`,
     });
 
-    await user.updateSubscription(
-      "basic",
-      "active",
-      subscription.id,
-      new Date(subscription.current_period_end * 1000)
-    );
-    return res.status(201).json({ subscription });
+    return res.status(200).json({ sessionId: session.id });
   } catch (error) {
     logger.error("[SUBSCRIPTION]: ", error);
     return res.status(500).json({ message: "Failed to create subscription." });
@@ -89,6 +87,7 @@ export const createSubscription = async (req, res) => {
  * @param {Response} res
  * @returns {any}
  */
+
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -106,18 +105,26 @@ export const stripeWebhook = async (req, res) => {
 
   // Handle the event
   switch (event.type) {
-    case "invoice.payment_succeeded":
-      logger.success("[PAYMENT_SUCCEEDED]");
-      // Handle successful payment
+    case "checkout.session.completed":
+      const session = event.data.object;
+      // Retrieve the subscription details
+      const subscription = await stripe.subscriptions.retrieve(
+        session.subscription
+      );
+
+      // Update the user's subscription in your database
+      const user = await getUserByStripeCustomerId(session.customer);
+      if (user) {
+        await user.updateSubscription(
+          subscription.plan.nickname || "default",
+          subscription.status,
+          subscription.id,
+          new Date(subscription.current_period_end * 1000)
+        );
+        logger.success(`Updated subscription for user ${user._id}`);
+      }
       break;
-    case "invoice.payment_failed":
-      logger.error("[PAYMENT_FAILED]");
-      // Handle payment failure
-      break;
-    case "customer.subscription.updated":
-      logger.info("[SUBSCRIPTION_UPDATED]");
-      // Handle subscription update
-      break;
+    // ... handle other events
     default:
       logger.info(`Unhandled event type: ${event.type}`);
   }

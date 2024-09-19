@@ -1,9 +1,12 @@
 import { api, cn, formatPriceData } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { loadStripe } from "@stripe/stripe-js";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Suspense, useState } from "react";
 import PricingCardLoading from "./PricingCardLoading";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISH_KEY);
 
 const PricingCard = () => {
   const [isAnnual, setIsAnnual] = useState(true);
@@ -15,7 +18,7 @@ const PricingCard = () => {
   } = useQuery({
     queryKey: ["priceTable"],
     queryFn: async () => {
-      const { data } = await api.get("/api/subscription/products");
+      const { data } = await api.get("/api/subscription/plans");
       return data;
     },
   });
@@ -42,6 +45,26 @@ const PricingCard = () => {
         damping: 7,
       },
     },
+  };
+
+  const createSubscriptionMutation = useMutation({
+    mutationFn: async (priceId) => {
+      console.log(priceId);
+      const { data } = await api.post("/api/subscriptions", { priceId });
+      return data;
+    },
+    onSuccess: async (data) => {
+      const stripe = await stripePromise;
+      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    },
+    onError: (error) => {
+      console.error("Subscription creation failed:", error);
+      // Handle error (e.g., show error message to user)
+    },
+  });
+
+  const handlePurchase = (priceId) => {
+    createSubscriptionMutation.mutate(priceId);
   };
 
   return (
@@ -140,8 +163,20 @@ const PricingCard = () => {
                           <div className="mb-5 text-sm text-slate-500">
                             {plan.description}
                           </div>
-                          <button className="inline-flex w-full justify-center whitespace-nowrap rounded-lg bg-indigo-500 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-950/10 transition-colors duration-150 hover:bg-indigo-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-indigo-300">
-                            Purchase Plan
+                          <button
+                            className="inline-flex w-full justify-center whitespace-nowrap rounded-lg bg-indigo-500 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-950/10 transition-colors duration-150 hover:bg-indigo-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-indigo-300"
+                            onClick={() =>
+                              handlePurchase(
+                                isAnnual
+                                  ? plan.annualPriceId
+                                  : plan.monthlyPriceId,
+                              )
+                            }
+                            disabled={createSubscriptionMutation.isLoading}
+                          >
+                            {createSubscriptionMutation.isLoading
+                              ? "Processing..."
+                              : "Purchase Plan"}
                           </button>
                         </div>
                         <div className="mb-3 font-medium text-slate-900">
