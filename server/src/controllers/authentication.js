@@ -11,7 +11,12 @@ import { authentication, logger, random } from "../utils/index.js";
 
 dotenv.config();
 
-//! Handles register action
+/**
+ * Handles register action
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -46,7 +51,12 @@ export const register = async (req, res) => {
   }
 };
 
-//! Handles login action
+/**
+ * Handles login action
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -94,7 +104,12 @@ export const login = async (req, res) => {
   }
 };
 
-//! Handles logout action
+/**
+ * Handles logout action
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const logout = async (req, res) => {
   try {
     const token = req.cookies.stream_auth;
@@ -124,7 +139,12 @@ export const logout = async (req, res) => {
   }
 };
 
-//! Checks if a user logged in or not
+/**
+ * Checks if a user logged in or not
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const authCheck = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];
