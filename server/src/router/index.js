@@ -1,3 +1,5 @@
+"use strict";
+
 import express from "express";
 import admin from "./admin.js";
 import authentication from "./authentication.js";

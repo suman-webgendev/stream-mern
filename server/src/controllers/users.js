@@ -1,7 +1,14 @@
+"use strict";
+
 import { getUsers } from "../actions/users.js";
 import { logger } from "../utils/index.js";
 
-//! Get all user list
+/**
+ * This function returns a list of the users.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const getAllUsers = async (req, res) => {
   try {
     const users = await getUsers();

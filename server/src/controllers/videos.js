@@ -1,4 +1,6 @@
-import fs from "fs";
+"use strict";
+
+import fs, { ReadStream } from "fs";
 import mongoose from "mongoose";
 import multer from "multer";
 import { promisify } from "util";
@@ -15,7 +17,12 @@ const upload = multer({
   limits: 100 * 1024 * 1024,
 });
 
-//! Video upload
+/**
+ * This function takes a video and title from the request body and writes it on the disk.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const uploadVideo = async (req, res) => {
   const uploadSingle = promisify(upload.single("video"));
   const currentUser = req.identity._id;
@@ -69,7 +76,12 @@ export const uploadVideo = async (req, res) => {
   }
 };
 
-//! Get all video list
+/**
+ * This function returns a list of the videos available.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const getAllVideos = async (req, res) => {
   try {
     const videos = await getVideos();
@@ -96,7 +108,12 @@ export const getAllVideos = async (req, res) => {
   }
 };
 
-//! Get a particular video based on the id
+/**
+ * This function takes an id as input parameter from the request parameter and streams the video
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<ReadStream>}
+ */
 export const getVideo = async (req, res) => {
   try {
     const { id } = req.params;

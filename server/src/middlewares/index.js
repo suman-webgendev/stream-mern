@@ -1,9 +1,20 @@
+"use strict";
+
+import express from "express";
 import pkg from "lodash";
 import { getUserBySessionToken } from "../actions/users.js";
 import { logger } from "../utils/index.js";
 const { merge } = pkg;
 
-//! Checks if user logged in or not using cookie
+/**
+ * This middleware takes `req`, `res` and `next` as input. It uses the cookie to check if user is authenticated or not.
+ * If user is authenticated the it returns the user object and calls the next function.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {express.NextFunction} next
+ * @returns {express.NextFunction}
+ */
 export const isAuthenticated = async (req, res, next) => {
   try {
     const sessionToken = req.cookies["stream_auth"];

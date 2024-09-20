@@ -1,7 +1,15 @@
+"use strict";
+
 import { db } from "../db/index.js";
 import { logger } from "../utils/index.js";
 
-//! Sending message to a user or group
+/**
+ * This function takes `req` and `res` as input. It extracts `currentUserId` from `req.identity` and also extracts `messageContent`, `chatId` and `chatType` from `req` body.
+ * It sends the message to the particular chat and updates the database.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const sendMessage = async (req, res) => {
   try {
     const currentUser = req.identity._id;
@@ -37,15 +45,23 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-//! Fetch all the message for a particular chat with pagination
+/**
+ * This function takes `req` and `res` as input. It extracts the `page` and `chatId` from the `req` body.
+ * It fetches all the messages and returns chats with `20` messages per page.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const allMessages = async (req, res) => {
   try {
     const page = Number.isNaN(parseInt(req.query.page))
       ? 1
       : parseInt(req.query.page);
+
+    const chatId = req.params.chatId;
     const limit = 20;
     const totalMessages = await db.Message.countDocuments({
-      chat: req.params.chatId,
+      chat: chatId,
     });
 
     const totalPages = Math.ceil(totalMessages / limit);
@@ -58,7 +74,7 @@ export const allMessages = async (req, res) => {
 
     const skip = (totalPages - page) * limit;
 
-    const messages = await db.Message.find({ chat: req.params.chatId })
+    const messages = await db.Message.find({ chat: chatId })
       .populate("sender", "name email")
       .sort({ createdAt: 1 })
       .skip(skip)

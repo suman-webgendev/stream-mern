@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import colors from "colors";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
@@ -16,6 +17,12 @@ dotenv.config();
 
 export const random = () => crypto.randomBytes(128).toString("base64");
 
+/**
+ * This function takes `salt` and `password` as input and returns hashed password.
+ * @param {string} salt
+ * @param {string} password
+ * @returns {string}
+ */
 export const authentication = (salt, password) => {
   return crypto
     .createHmac("sha256", [salt, password].join("/"))
@@ -38,6 +45,13 @@ export const storage = multer.diskStorage({
   },
 });
 
+/**
+ * This function takes `videoPath` and `thumbnailPath` as input.
+ * It creates a thumbnail using `ffmpeg`, then optimize it using sharp.
+ * @param {string} videoPath
+ * @param {string} thumbnailPath
+ * @returns {Promise<void>}
+ */
 export const generateThumbnail = async (videoPath, thumbnailPath) => {
   try {
     const tempThumbnailPath = `${thumbnailPath}.temp.png`;
@@ -79,6 +93,11 @@ export const generateThumbnail = async (videoPath, thumbnailPath) => {
   }
 };
 
+/**
+ * This function takes `imagePath` as input and convert the image into `base64` data and returns it.
+ * @param {string} imagePath
+ * @returns {Promise<string}
+ */
 export const readImageFile = (imagePath) => {
   return new Promise((resolve, reject) => {
     fs.readFile(imagePath, (err, data) => {
@@ -105,6 +124,11 @@ if (!fs.existsSync(logsDir)) {
 
 const logFilePath = path.join(logsDir, `${getTodaysDate()}.log`);
 
+/**
+ * @param {"error" | "warn" | "info" | "success"} level
+ * @param {any} message
+ * @returns {Promise<void>}
+ */
 const writeLogToFile = async (level, message) => {
   const logMessage = `[${new Date().toISOString()}] [${level.toUpperCase()}] ${message}\n`;
   try {
@@ -142,9 +166,9 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
 });
 
 /**
- * Description
+ * This function takes `amt` as input and returns plan type as output.
  * @param {number | string} amt
- * @returns {"basic" | "standard" | "premium" | "free"}
+ * @returns {Promise<"basic" | "standard" | "premium" | "free">}
  */
 export const subscriptionMap = async (amt) => {
   try {
@@ -181,4 +205,29 @@ export const subscriptionMap = async (amt) => {
     logger.error("[Fetch_Price_and_Plans]", error.stack);
     return null;
   }
+};
+
+/**
+ * Creates a rate limiter middleware.
+ * @param {number} timeWindow - The time window in minutes for rate limiting. Default time window `10 min`
+ * @param {number} maxTries - The maximum number of attempts allowed within the time window. Default maxTries `10`
+ * @param {string} message- The message to send when rate limit is exceeded. Default message `Too many attempts, please try again later.`
+ * @returns {import('express-rate-limit').RateLimitRequestHandler} The configured rate limiter middleware.
+ */
+export const rateLimiter = (
+  timeWindow = 10,
+  maxTries = 10,
+  message = "Too many attempts, please try again later."
+) => {
+  return rateLimit({
+    windowMs: timeWindow * 60 * 1000,
+    max: maxTries,
+    legacyHeaders: false,
+    standardHeaders: "draft-7",
+    message: {
+      message,
+      retryAfter: timeWindow,
+    },
+    statusCode: 429,
+  });
 };

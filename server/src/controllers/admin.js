@@ -1,3 +1,5 @@
+"use strict";
+
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import {
@@ -11,7 +13,12 @@ import { authentication, logger, readImageFile } from "../utils/index.js";
 
 dotenv.config();
 
-//! Renders login page for admin
+/**
+ * Renders login page for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const renderLoginPage = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];
@@ -31,7 +38,12 @@ export const renderLoginPage = async (req, res) => {
   }
 };
 
-//! handle login action for admin
+/**
+ * This function handles login action for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const handleLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,7 +103,12 @@ export const handleLogin = async (req, res) => {
   }
 };
 
-//! Renders dashboard page for admin
+/**
+ * Renders dashboard page for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const dashboard = async (req, res) => {
   try {
     const videos = await getVideos();
@@ -114,7 +131,12 @@ export const dashboard = async (req, res) => {
   }
 };
 
-//! Returns video list as data-table for admin
+/**
+ * Returns video list as data-table for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const videos = async (req, res) => {
   try {
     const videos = await getVideos();
@@ -145,17 +167,32 @@ export const videos = async (req, res) => {
   }
 };
 
-//! Renders video upload page for admin
+/**
+ * Renders video upload page for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const displayUploadVideo = async (req, res) => {
   return res.render("upload", { currentPage: "videos" });
 };
 
-//! Renders add user page for admin
+/**
+ * Renders add user page for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const displayAddUser = async (req, res) => {
   return res.render("adduser", { currentPage: "users" });
 };
 
-//! Renders user list as data-table for admin
+/**
+ * Renders user list as data-table for admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const users = async (req, res) => {
   try {
     const users = await getUsers();
@@ -172,7 +209,12 @@ export const users = async (req, res) => {
   }
 };
 
-//! Handles logout action for the admin
+/**
+ * Handles logout action for the admin.
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
 export const adminLogout = async (req, res) => {
   try {
     const token = req.cookies["stream_auth"];

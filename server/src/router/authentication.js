@@ -1,4 +1,6 @@
-import { rateLimit } from "express-rate-limit";
+"use strict";
+
+import { Router } from "express";
 import {
   authCheck,
   login,
@@ -6,25 +8,17 @@ import {
   register,
 } from "../controllers/authentication.js";
 import { isAuthenticated } from "../middlewares/index.js";
+import { rateLimiter } from "../utils/index.js";
 
-const authRateLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 10,
-  legacyHeaders: false,
-  standardHeaders: "draft-7",
-  message: {
-    message: "Too many login/register attempts, please try again later.",
-    retryAfter: 10,
-  },
-  statusCode: 429,
-});
-
+/**
+ * @param {Router} router
+ */
 export default (router) => {
   //? Handles register action
-  router.post("/api/auth/register", authRateLimiter, register);
+  router.post("/api/auth/register", rateLimiter(), register);
 
   //? Handles login action
-  router.post("/api/auth/login", authRateLimiter, login);
+  router.post("/api/auth/login", rateLimiter(), login);
 
   //? Handles logout action
   router.post("/api/auth/logout", isAuthenticated, logout);

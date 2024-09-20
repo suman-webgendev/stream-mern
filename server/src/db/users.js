@@ -1,3 +1,5 @@
+"use strict";
+
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -20,7 +22,6 @@ const userSchema = new mongoose.Schema({
     default: "none",
   },
   subscriptionId: { type: String },
-  subscriptionEndDate: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -34,7 +35,6 @@ userSchema.methods.updateSubscription = function (
   this.subscriptionPlan = plan;
   this.subscriptionStatus = status;
   this.subscriptionId = subscriptionId;
-  this.subscriptionEndDate = endDate;
   this.updatedAt = new Date();
   return this.save();
 };

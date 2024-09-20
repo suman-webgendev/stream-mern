@@ -1,3 +1,5 @@
+"use strict";
+
 import { Admin } from "./admin.js";
 import { Chat } from "./chat.js";
 import { Message } from "./message.js";

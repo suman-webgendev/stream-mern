@@ -1,3 +1,5 @@
+"use strict";
+
 import dotenv from "dotenv";
 import { getUserById } from "../actions/users.js";
 import { logger, stripe, subscriptionMap } from "../utils/index.js";
@@ -5,10 +7,11 @@ import { logger, stripe, subscriptionMap } from "../utils/index.js";
 dotenv.config();
 
 /**
+ * Returns all the plans along with prices (monthly, yearly)
  * @param {Request} req
  * @param {Response} res
+ * @returns {Promise<Response>}
  */
-//! Returns all the plans along with prices (monthly, yearly)
 export const getAllStripePlans = async (req, res) => {
   try {
     const [plans, prices] = await Promise.all([
@@ -36,10 +39,11 @@ export const getAllStripePlans = async (req, res) => {
 };
 
 /**
+ * Create a subscription for a existing customer or create customer and create subscription.
  * @param {Request} req
  * @param {Response} res
+ * @returns {Promise<Response>}
  */
-//! Create a subscription for a existing customer or create customer and create subscription
 export const createSubscription = async (req, res) => {
   const { priceId } = req.body;
   const currentUser = req.identity._id;
@@ -55,8 +59,6 @@ export const createSubscription = async (req, res) => {
       await user.save();
       logger.success("New stripe customer created!");
     }
-
-    logger.success("Existing stripe customer");
 
     const session = await stripe.checkout.sessions.create({
       customer: user.stripeCustomerId,
@@ -83,8 +85,10 @@ export const createSubscription = async (req, res) => {
 };
 
 /**
+ * This function creates webhook for stripe payment.
  * @param {Request} req
  * @param {Response} res
+ * @returns {Promise<Response>}
  */
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -116,8 +120,7 @@ export const stripeWebhook = async (req, res) => {
         await user.updateSubscription(
           subscription.plan.nickname || "default",
           subscription.status,
-          subscription.id,
-          new Date(subscription.current_period_end * 1000)
+          subscription.id
         );
         logger.success(`Updated subscription for user ${user._id}`);
       }
@@ -131,8 +134,11 @@ export const stripeWebhook = async (req, res) => {
 };
 
 /**
+ * This function takes `sessionId` and `currentUserId` from `req` body and checks the `stripe` checkout session.
+ * If the checkout payment status is `paid`, it update the database with the `plan`, `status` and `subscriptionId`.
  * @param {Request} req
  * @param {Response} res
+ * @returns {Promise<Response>}
  */
 export const verifySession = async (req, res) => {
   const { sessionId } = req.body;
@@ -147,14 +153,9 @@ export const verifySession = async (req, res) => {
       if (!user) {
         return res.json({ verified: false });
       }
-      const plan = subscriptionMap(session.amount_total);
+      const plan = await subscriptionMap(session.amount_total);
 
-      await user.updateSubscription(
-        plan,
-        "active",
-        session.subscription,
-        session.expires_at
-      );
+      await user.updateSubscription(plan, "active", session.subscription);
 
       await user.save();
 

@@ -1,3 +1,6 @@
+"use strict";
+
+import { Router } from "express";
 import {
   adminLogout,
   dashboard,
@@ -9,42 +12,37 @@ import {
   videos,
 } from "../controllers/admin.js";
 import { isAuthenticatedAdmin } from "../middlewares/admin.js";
+import { rateLimiter } from "../utils/index.js";
 
-import { rateLimit } from "express-rate-limit";
-
-const adminRateLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 2000,
-  legacyHeaders: false,
-  standardHeaders: "draft-7",
-  message: {
-    message: "Too many attempts, please try again later.",
-    retryAfter: 10,
-  },
-  statusCode: 429,
-});
-
+/**
+ * @param {Router} router
+ */
 export default (router) => {
   //? Renders login page for admin page
   router.get("/", renderLoginPage);
 
   //? Handles login action within admin page
-  router.post("/", adminRateLimiter, handleLogin);
+  router.post("/", rateLimiter(), handleLogin);
 
   //? Renders dashboard page
-  router.get("/dashboard", isAuthenticatedAdmin, adminRateLimiter, dashboard);
+  router.get(
+    "/dashboard",
+    isAuthenticatedAdmin,
+    rateLimiter(10, 100),
+    dashboard
+  );
 
   //? Renders users page, shows user table
-  router.get("/users", isAuthenticatedAdmin, adminRateLimiter, users);
+  router.get("/users", isAuthenticatedAdmin, rateLimiter(10, 100), users);
 
   //? Renders videos page, shows videos table
-  router.get("/videos", isAuthenticatedAdmin, adminRateLimiter, videos);
+  router.get("/videos", isAuthenticatedAdmin, rateLimiter(10, 100), videos);
 
   //? Renders video upload page
   router.get(
     "/video/upload",
     isAuthenticatedAdmin,
-    adminRateLimiter,
+    rateLimiter(10, 100),
     displayUploadVideo
   );
 
@@ -52,7 +50,7 @@ export default (router) => {
   router.get(
     "/user/create",
     isAuthenticatedAdmin,
-    adminRateLimiter,
+    rateLimiter(10, 100),
     displayAddUser
   );
 
