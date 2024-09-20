@@ -6,8 +6,8 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 import sharp from "sharp";
+import Stripe from "stripe";
 import { fileURLToPath } from "url";
-import Stripe from "stripe"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -137,8 +137,48 @@ export const logger = {
   },
 };
 
-
-
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: "2024-06-20",
+  apiVersion: "2024-06-20",
 });
+
+/**
+ * Description
+ * @param {number | string} amt
+ * @returns {"basic" | "standard" | "premium" | "free"}
+ */
+export const subscriptionMap = async (amt) => {
+  try {
+    const [plans, prices] = await Promise.all([
+      stripe.products.list(),
+      stripe.prices.list(),
+    ]);
+
+    const subscriptionMap = prices.data.reduce((map, price) => {
+      if (price.active) {
+        const plan = plans.data.find((p) => p.id === price.product);
+        if (plan) {
+          const planMapping = {
+            basic: plan.name.toLowerCase().includes("basic"),
+            standard: plan.name.toLowerCase().includes("standard"),
+            premium: plan.name.toLowerCase().includes("premium"),
+          };
+
+          const planName = Object.keys(planMapping).find(
+            (key) => planMapping[key]
+          );
+
+          if (planName) {
+            map[price.unit_amount] = planName;
+          }
+        }
+      }
+      return map;
+    }, {});
+
+    const matchedPlan = subscriptionMap[String(amt)] || "free";
+    return matchedPlan;
+  } catch (error) {
+    logger.error("[Fetch_Price_and_Plans]", error.stack);
+    return null;
+  }
+};

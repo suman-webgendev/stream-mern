@@ -8,8 +8,10 @@ import PricingCardLoading from "./PricingCardLoading";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISH_KEY);
 
-const PricingCard = () => {
+const PricingCard = ({ verificationData }) => {
   const [isAnnual, setIsAnnual] = useState(true);
+
+  console.log(verificationData);
 
   const {
     data: apiResponse,
@@ -42,14 +44,13 @@ const PricingCard = () => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 7,
+        damping: 5,
       },
     },
   };
 
   const createSubscriptionMutation = useMutation({
     mutationFn: async (priceId) => {
-      console.log(priceId);
       const { data } = await api.post("/api/subscriptions", { priceId });
       return data;
     },
@@ -156,8 +157,8 @@ const PricingCard = () => {
                             <span className="text-4xl font-bold text-slate-900">
                               {isAnnual ? plan.annualPrice : plan.monthlyPrice}
                             </span>
-                            <span className="font-medium text-slate-500">
-                              {isAnnual ? "/year" : "/month"}
+                            <span className="ml-0.5 font-medium text-slate-500">
+                              {isAnnual ? " /year" : " /month"}
                             </span>
                           </div>
                           <div className="mb-5 text-sm text-slate-500">

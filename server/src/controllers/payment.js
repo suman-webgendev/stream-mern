@@ -1,16 +1,13 @@
 import dotenv from "dotenv";
 import { getUserById } from "../actions/users.js";
-import { logger, stripe } from "../utils/index.js";
+import { logger, stripe, subscriptionMap } from "../utils/index.js";
 
 dotenv.config();
 
 /**
- * Description
  * @param {Request} req
  * @param {Response} res
- * @returns {JSON}
  */
-
 //! Returns all the plans along with prices (monthly, yearly)
 export const getAllStripePlans = async (req, res) => {
   try {
@@ -39,11 +36,10 @@ export const getAllStripePlans = async (req, res) => {
 };
 
 /**
- * Description
  * @param {Request} req
  * @param {Response} res
- * @returns {any}
  */
+//! Create a subscription for a existing customer or create customer and create subscription
 export const createSubscription = async (req, res) => {
   const { priceId } = req.body;
   const currentUser = req.identity._id;
@@ -60,9 +56,11 @@ export const createSubscription = async (req, res) => {
       logger.success("New stripe customer created!");
     }
 
+    logger.success("Existing stripe customer");
+
     const session = await stripe.checkout.sessions.create({
       customer: user.stripeCustomerId,
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "amazon_pay", "cashapp"],
       line_items: [
         {
           price: priceId,
@@ -70,24 +68,24 @@ export const createSubscription = async (req, res) => {
         },
       ],
       mode: "subscription",
-      success_url: `${process.env.CLIENT_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/subscription/canceled`,
+      success_url: `${process.env.CLIENT_URL}/pricing?status=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_URL}/pricing?status=canceled`,
     });
 
     return res.status(200).json({ sessionId: session.id });
   } catch (error) {
     logger.error("[SUBSCRIPTION]: ", error);
-    return res.status(500).json({ message: "Failed to create subscription." });
+    return res.status(500).json({
+      message: "Failed to create subscription.",
+      redirectUrl: `${process.env.CLIENT_URL}/pricing?status=failed`,
+    });
   }
 };
 
 /**
- * Description
  * @param {Request} req
  * @param {Response} res
- * @returns {any}
  */
-
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
@@ -130,4 +128,42 @@ export const stripeWebhook = async (req, res) => {
   }
 
   return res.json({ received: true });
+};
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const verifySession = async (req, res) => {
+  const { sessionId } = req.body;
+  const currentUser = req.identity._id;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status === "paid") {
+      const user = await getUserById(currentUser);
+
+      if (!user) {
+        return res.json({ verified: false });
+      }
+      const plan = subscriptionMap(session.amount_total);
+
+      await user.updateSubscription(
+        plan,
+        "active",
+        session.subscription,
+        session.expires_at
+      );
+
+      await user.save();
+
+      return res.json({ verified: true });
+    } else {
+      return res.json({ verified: false });
+    }
+  } catch (error) {
+    console.error("Error verifying session:", error);
+    return res.status(500).json({ message: "Failed to verify session." });
+  }
 };
