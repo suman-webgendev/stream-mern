@@ -2,10 +2,10 @@ import { db } from "../db/index.js";
 import { logger } from "../utils/index.js";
 
 /**
- * Get the chat between two user if doesn't exist create one
+ * Get the chat between two user if doesn't exist create one.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const accessChats = async (req, res) => {
   try {
@@ -63,10 +63,10 @@ export const accessChats = async (req, res) => {
 };
 
 /**
- * Get all the chats for a user
+ * Get all the chats for a user.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const getAllChats = async (req, res) => {
   const currentUser = req.identity._id;
@@ -105,10 +105,10 @@ export const getAllChats = async (req, res) => {
 };
 
 /**
- * Search users
+ * Search users.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const searchUser = async (req, res) => {
   try {
@@ -138,10 +138,10 @@ export const searchUser = async (req, res) => {
 };
 
 /**
- * Create group chat
+ * Create group chat.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const createGroupChat = async (req, res) => {
   try {
@@ -191,10 +191,10 @@ export const createGroupChat = async (req, res) => {
 };
 
 /**
- * Rename group
+ * Rename group.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const renameGroup = async (req, res) => {
   try {
@@ -231,10 +231,10 @@ export const renameGroup = async (req, res) => {
 };
 
 /**
- * Remove a member from the group
+ * Remove a member from the group.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const removeFromGroup = async (req, res) => {
   try {
@@ -278,10 +278,10 @@ export const removeFromGroup = async (req, res) => {
 };
 
 /**
- * Add a member to the group
+ * Add a member to the group.
  * @param {Request} req
  * @param {Response} res
- * @returns {Promise<Response}
+ * @returns {Promise<Response>}
  */
 export const addToGroup = async (req, res) => {
   try {
