@@ -19,9 +19,10 @@ export const random = () => crypto.randomBytes(128).toString("base64");
 
 /**
  * This function takes `salt` and `password` as input and returns hashed password.
- * @param {string} salt
- * @param {string} password
- * @returns {string}
+ *
+ * @param {string} salt - The salt value.
+ * @param {string} password - The password value.
+ * @returns {string} - The hashed password.
  */
 export const authentication = (salt, password) => {
   return crypto
@@ -30,6 +31,14 @@ export const authentication = (salt, password) => {
     .digest("hex");
 };
 
+/**
+ * This function takes `req`, `file` and `cb` as input and returns the upload path.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {File} file - The file object.
+ * @param {Function} cb - The callback function.
+ * @returns {string} - The upload path.
+ */
 export const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = "public/videos";
@@ -48,8 +57,9 @@ export const storage = multer.diskStorage({
 /**
  * This function takes `videoPath` and `thumbnailPath` as input.
  * It creates a thumbnail using `ffmpeg`, then optimize it using sharp.
- * @param {string} videoPath
- * @param {string} thumbnailPath
+ *
+ * @param {string} videoPath - The path of the video file.
+ * @param {string} thumbnailPath - The path of the thumbnail file.
  * @returns {Promise<void>}
  */
 export const generateThumbnail = async (videoPath, thumbnailPath) => {
@@ -95,8 +105,9 @@ export const generateThumbnail = async (videoPath, thumbnailPath) => {
 
 /**
  * This function takes `imagePath` as input and convert the image into `base64` data and returns it.
- * @param {string} imagePath
- * @returns {Promise<string}
+ *
+ * @param {string} imagePath - The path of the image file.
+ * @returns {Promise<string>} - A Promise that resolves to the base64 data of the image.
  */
 export const readImageFile = (imagePath) => {
   return new Promise((resolve, reject) => {
@@ -112,12 +123,23 @@ export const readImageFile = (imagePath) => {
   });
 };
 
+/**
+ * This function returns the current date in the format of `YYYY-MM-DD`.
+ *
+ * @returns {string} - The current date in the format of `YYYY-MM-DD`.
+ */
 const getTodaysDate = () => {
   const date = new Date();
   return date.toISOString().split("T")[0];
 };
 
+/**
+ * This function returns the path of the logs directory.
+ *
+ * @returns {string} - The path of the logs directory.
+ */
 const logsDir = path.join(__dirname, "../../logs");
+
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
@@ -125,6 +147,9 @@ if (!fs.existsSync(logsDir)) {
 const logFilePath = path.join(logsDir, `${getTodaysDate()}.log`);
 
 /**
+ * This function takes `level` and `message` as input and writes the log message to the log file.
+ * It also logs the message to the console.
+ *
  * @param {"error" | "warn" | "info" | "success"} level
  * @param {any} message
  * @returns {Promise<void>}
@@ -161,13 +186,17 @@ export const logger = {
   },
 };
 
+/**
+ * This is the Stripe API instance.
+ */
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-06-20",
 });
 
 /**
  * This function takes `amt` as input and returns plan type as output.
- * @param {number | string} amt
+ *
+ * @param {number | string} amt - The amount of the subscription.
  * @returns {Promise<"basic" | "standard" | "premium" | "free">}
  */
 export const subscriptionMap = async (amt) => {
