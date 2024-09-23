@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
     enum: ["free", "basic", "standard", "premium"],
     default: "free",
   },
+  subscriptionAmount: {
+    type: Number,
+    default: 0,
+  },
   subscriptionStatus: {
     type: String,
     enum: ["active", "canceled", "past_due", "none"],
@@ -30,11 +34,12 @@ userSchema.methods.updateSubscription = function (
   plan,
   status,
   subscriptionId,
-  endDate
+  subscriptionAmount
 ) {
   this.subscriptionPlan = plan;
   this.subscriptionStatus = status;
   this.subscriptionId = subscriptionId;
+  this.subscriptionAmount = subscriptionAmount;
   this.updatedAt = new Date();
   return this.save();
 };

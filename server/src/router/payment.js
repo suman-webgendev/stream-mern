@@ -2,6 +2,7 @@
 
 import express, { Router } from "express";
 import {
+  createBillingPortalSession,
   createSubscription,
   getAllStripePlans,
   stripeWebhook,
@@ -43,5 +44,13 @@ export default (router) => {
     isAuthenticated,
     rateLimiter(),
     verifySession
+  );
+
+  //? Create a Stripe billing portal session
+  router.post(
+    "/api/subscription/billing-portal",
+    isAuthenticated,
+    rateLimiter(),
+    createBillingPortalSession
   );
 };

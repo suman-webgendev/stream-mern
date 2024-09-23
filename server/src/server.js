@@ -41,10 +41,16 @@ app.options(
   })
 );
 
+app.use(
+  "/api/subscriptions/webhook",
+  express.raw({ type: "application/json" })
+);
+
 app.use(compression());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 
 // View engine setup
 app.set("view engine", "ejs");

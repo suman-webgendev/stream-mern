@@ -1,15 +1,3 @@
-// import PricingCard from "@/components/payment/PricingCard";
-
-// const PricingPage = () => {
-//   return (
-//     <div>
-//       <PricingCard />
-//     </div>
-//   );
-// };
-
-// export default PricingPage;
-
 import PricingCard from "@/components/payment/PricingCard";
 import { api } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -30,9 +18,6 @@ const PricingPage = () => {
   const status = searchParams.get("status");
   const sessionId = searchParams.get("session_id");
 
-  console.log(status, "status");
-  console.log(sessionId, "session_id");
-
   const {
     data: verificationData,
     isLoading,
@@ -41,26 +26,25 @@ const PricingPage = () => {
     queryKey: ["verifySession", sessionId],
     queryFn: () => verifySession(sessionId),
     enabled: !!sessionId && status === "success",
-    retry: false, // Don't retry on failure
+    retry: false,
   });
 
   useEffect(() => {
     if (!isLoading && (verificationData || isError)) {
-      // Clear URL parameters after verification attempt
       navigate("/pricing", { replace: true });
     }
   }, [isLoading, verificationData, isError, navigate]);
 
-  const subscriptionStatus = (() => {
-    if (status === "success" && verificationData?.verified) return "success";
-    if (status === "canceled") return "canceled";
-    if (
-      status === "failed" ||
-      (status === "success" && verificationData?.verified === false)
-    )
-      return "failed";
-    return null;
-  })();
+  // const subscriptionStatus = (() => {
+  //   if (status === "success" && verificationData?.verified) return "success";
+  //   if (status === "canceled") return "canceled";
+  //   if (
+  //     status === "failed" ||
+  //     (status === "success" && verificationData?.verified === false)
+  //   )
+  //     return "failed";
+  //   return null;
+  // })();
 
   return (
     <div className="relative antialiased">
@@ -70,7 +54,7 @@ const PricingPage = () => {
             Verifying your subscription...
           </div>
         )}
-        {subscriptionStatus && (
+        {/* {subscriptionStatus && (
           <div
             className={`mb-4 text-center ${
               subscriptionStatus === "success"
@@ -83,8 +67,8 @@ const PricingPage = () => {
             {subscriptionStatus === "failed" &&
               "Subscription failed. Please try again."}
           </div>
-        )}
-        <PricingCard verificationData={verificationData} />
+        )} */}
+        <PricingCard />
       </main>
     </div>
   );

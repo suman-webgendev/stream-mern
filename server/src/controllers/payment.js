@@ -1,18 +1,18 @@
 "use strict";
 
 import dotenv from "dotenv";
-import { getUserById } from "../actions/users.js";
+import { getUserById, getUserByStripeCustomerId } from "../actions/users.js";
 import { logger, stripe, subscriptionMap } from "../utils/index.js";
 
 dotenv.config();
 
 /**
  * Returns all the plans along with prices (monthly, yearly)
- * @param {Request} req
+ * @param {Request} _req
  * @param {Response} res
  * @returns {Promise<Response>}
  */
-export const getAllStripePlans = async (req, res) => {
+export const getAllStripePlans = async (_req, res) => {
   try {
     const [plans, prices] = await Promise.all([
       stripe.products.list(),
@@ -105,27 +105,76 @@ export const stripeWebhook = async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   switch (event.type) {
+    //! Subscription started
     case "checkout.session.completed":
+      logger.success("A new subscription was created");
       const session = event.data.object;
-      // Retrieve the subscription details
+
       const subscription = await stripe.subscriptions.retrieve(
         session.subscription
       );
 
-      // Update the user's subscription in your database
       const user = await getUserByStripeCustomerId(session.customer);
       if (user) {
         await user.updateSubscription(
-          subscription.plan.nickname || "default",
+          subscription.plan.nickname || "free",
           subscription.status,
-          subscription.id
+          subscription.id,
+          subscription.plan.amount
         );
         logger.success(`Updated subscription for user ${user._id}`);
       }
       break;
-    // ... handle other events
+
+    //! Subscription updated
+    case "customer.subscription.updated":
+      const updatedSubscription = event.data.object;
+      const updatedUser = await getUserByStripeCustomerId(
+        updatedSubscription.customer
+      );
+      if (updatedUser) {
+        await updatedUser.updateSubscription(
+          updatedSubscription.plan.nickname || "free",
+          updatedSubscription.status,
+          updatedSubscription.id,
+          updatedSubscription.plan.amount
+        );
+        logger.success(`Updated subscription for user ${updatedUser._id}`);
+      }
+      break;
+
+    //! Subscription canceled
+    case "customer.subscription.deleted":
+      const deletedSubscription = event.data.object;
+      const userWithDeletedSub = await getUserByStripeCustomerId(
+        deletedSubscription.customer
+      );
+      if (userWithDeletedSub) {
+        await userWithDeletedSub.updateSubscription(
+          "free",
+          "canceled",
+          null,
+          0
+        );
+        logger.success(
+          `Cancelled subscription for user ${userWithDeletedSub._id}`
+        );
+      }
+      break;
+
+    //! Payment succeeded in every subscription interval (monthly, yearly, etc.)
+    case "invoice.paid":
+      console.log("Payment succeeded in every subscription interval");
+      console.log(event.data.object);
+      break;
+
+    //! Payment failed due to insufficient funds or card declined in a subscription interval (monthly, yearly, etc.)
+    case "invoice.payment_failed":
+      console.log("Payment failed due to insufficient funds or card declined");
+      console.log(event.data.object);
+      break;
+
     default:
       logger.info(`Unhandled event type: ${event.type}`);
   }
@@ -155,7 +204,12 @@ export const verifySession = async (req, res) => {
       }
       const plan = await subscriptionMap(session.amount_total);
 
-      await user.updateSubscription(plan, "active", session.subscription);
+      await user.updateSubscription(
+        plan,
+        "active",
+        session.subscription,
+        Number(session.amount_total) / 100
+      );
 
       await user.save();
 
@@ -164,7 +218,39 @@ export const verifySession = async (req, res) => {
       return res.json({ verified: false });
     }
   } catch (error) {
-    console.error("Error verifying session:", error);
+    logger.error("Error verifying session:", error);
     return res.status(500).json({ message: "Failed to verify session." });
+  }
+};
+
+/**
+ * Creates a Stripe billing portal session for the current user
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
+export const createBillingPortalSession = async (req, res) => {
+  const currentUser = req.identity._id;
+  try {
+    const user = await getUserById(currentUser);
+
+    if (!user.stripeCustomerId) {
+      return res
+        .status(400)
+        .json({ message: "User has no active subscription" });
+    }
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: `${process.env.CLIENT_URL}/pricing`,
+    });
+
+    return res.status(200).json({ url: session.url });
+  } catch (error) {
+    logger.error("[BILLING_PORTAL]: ", error);
+    return res.status(500).json({
+      message: "Failed to create billing portal session.",
+      redirectUrl: `${process.env.CLIENT_URL}/pricing?status=failed`,
+    });
   }
 };

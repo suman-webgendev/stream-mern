@@ -15,3 +15,6 @@ export const getUserBySessionToken = (sessionToken) =>
 
 export const createUser = (values) =>
   new db.User(values).save().then((user) => user.toObject());
+
+export const getUserByStripeCustomerId = (stripeCustomerId) =>
+  db.User.findOne({ stripeCustomerId: stripeCustomerId });

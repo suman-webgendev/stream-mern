@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { api, cn, formatPriceData } from "@/lib/utils";
 import { loadStripe } from "@stripe/stripe-js";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -8,10 +9,9 @@ import PricingCardLoading from "./PricingCardLoading";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISH_KEY);
 
-const PricingCard = ({ verificationData }) => {
+const PricingCard = () => {
   const [isAnnual, setIsAnnual] = useState(true);
-
-  console.log(verificationData);
+  const { user } = useAuth();
 
   const {
     data: apiResponse,
@@ -58,14 +58,28 @@ const PricingCard = ({ verificationData }) => {
       const stripe = await stripePromise;
       await stripe.redirectToCheckout({ sessionId: data.sessionId });
     },
-    onError: (error) => {
-      console.error("Subscription creation failed:", error);
-      // Handle error (e.g., show error message to user)
+  });
+
+  const createBillingPortalSessionMutation = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post("/api/subscription/billing-portal");
+      return data;
+    },
+    onSuccess: (data) => {
+      window.location.href = data.url;
     },
   });
 
   const handlePurchase = (priceId) => {
     createSubscriptionMutation.mutate(priceId);
+  };
+
+  const handleManagePlan = () => {
+    createBillingPortalSessionMutation.mutate();
+  };
+
+  const isCurrentPlan = (planPrice) => {
+    return user?.subscriptionAmount === planPrice;
   };
 
   return (
@@ -138,11 +152,29 @@ const PricingCard = ({ verificationData }) => {
                       className="h-full"
                       variants={itemVariants}
                     >
-                      <div className="relative flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow shadow-slate-950/5">
+                      <div
+                        className={cn(
+                          "relative flex h-full flex-col rounded-2xl border p-6 shadow shadow-slate-950/5",
+                          isCurrentPlan(
+                            isAnnual ? plan.annualPrice : plan.monthlyPrice,
+                          )
+                            ? "border-indigo-500 bg-indigo-50"
+                            : "border-slate-200 bg-white",
+                        )}
+                      >
                         {plan.popular && (
                           <div className="absolute right-0 top-0 -mt-4 mr-6">
                             <div className="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-slate-950/5">
                               Most Popular
+                            </div>
+                          </div>
+                        )}
+                        {isCurrentPlan(
+                          isAnnual ? plan.annualPrice : plan.monthlyPrice,
+                        ) && (
+                          <div className="absolute left-0 top-0 -mt-4 ml-6">
+                            <div className="inline-flex items-center rounded-full bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-slate-950/5">
+                              Current Plan
                             </div>
                           </div>
                         )}
@@ -165,19 +197,40 @@ const PricingCard = ({ verificationData }) => {
                             {plan.description}
                           </div>
                           <button
-                            className="inline-flex w-full justify-center whitespace-nowrap rounded-lg bg-indigo-500 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-950/10 transition-colors duration-150 hover:bg-indigo-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-indigo-300"
-                            onClick={() =>
-                              handlePurchase(
-                                isAnnual
-                                  ? plan.annualPriceId
-                                  : plan.monthlyPriceId,
+                            className={cn(
+                              "inline-flex w-full cursor-pointer justify-center whitespace-nowrap rounded-lg px-3.5 py-2.5 text-sm font-medium shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring",
+                              isCurrentPlan(
+                                isAnnual ? plan.annualPrice : plan.monthlyPrice,
                               )
+                                ? "bg-indigo-600 text-white shadow-indigo-950/10 hover:bg-indigo-700 focus-visible:ring-indigo-300"
+                                : "bg-indigo-500 text-white shadow-indigo-950/10 hover:bg-indigo-600 focus-visible:ring-indigo-300",
+                            )}
+                            onClick={() =>
+                              isCurrentPlan(
+                                isAnnual ? plan.annualPrice : plan.monthlyPrice,
+                              )
+                                ? handleManagePlan()
+                                : handlePurchase(
+                                    isAnnual
+                                      ? plan.annualPriceId
+                                      : plan.monthlyPriceId,
+                                  )
                             }
-                            disabled={createSubscriptionMutation.isLoading}
+                            disabled={
+                              createSubscriptionMutation.isLoading ||
+                              createBillingPortalSessionMutation.isLoading
+                            }
                           >
-                            {createSubscriptionMutation.isLoading
+                            {createSubscriptionMutation.isLoading ||
+                            createBillingPortalSessionMutation.isLoading
                               ? "Processing..."
-                              : "Purchase Plan"}
+                              : isCurrentPlan(
+                                    isAnnual
+                                      ? plan.annualPrice
+                                      : plan.monthlyPrice,
+                                  )
+                                ? "Manage Plan"
+                                : "Purchase Plan"}
                           </button>
                         </div>
                         <div className="mb-3 font-medium text-slate-900">
