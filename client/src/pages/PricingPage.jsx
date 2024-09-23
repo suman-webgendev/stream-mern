@@ -1,7 +1,7 @@
-import PricingCard from "@/components/payment/PricingCard";
+import PricingCardLoading from "@/components/payment/PricingCardLoading";
 import { api } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const verifySession = async (sessionId) => {
@@ -12,6 +12,7 @@ const verifySession = async (sessionId) => {
 };
 
 const PricingPage = () => {
+  const PricingCard = lazy(() => import("@/components/payment/PricingCard"));
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -35,17 +36,6 @@ const PricingPage = () => {
     }
   }, [isLoading, verificationData, isError, navigate]);
 
-  // const subscriptionStatus = (() => {
-  //   if (status === "success" && verificationData?.verified) return "success";
-  //   if (status === "canceled") return "canceled";
-  //   if (
-  //     status === "failed" ||
-  //     (status === "success" && verificationData?.verified === false)
-  //   )
-  //     return "failed";
-  //   return null;
-  // })();
-
   return (
     <div className="relative antialiased">
       <main className="relative flex h-[92vh] flex-col items-center justify-center overflow-hidden">
@@ -54,21 +44,9 @@ const PricingPage = () => {
             Verifying your subscription...
           </div>
         )}
-        {/* {subscriptionStatus && (
-          <div
-            className={`mb-4 text-center ${
-              subscriptionStatus === "success"
-                ? "text-green-600"
-                : "text-red-600"
-            }`}
-          >
-            {subscriptionStatus === "success" && "Subscription successful!"}
-            {subscriptionStatus === "canceled" && "Subscription canceled."}
-            {subscriptionStatus === "failed" &&
-              "Subscription failed. Please try again."}
-          </div>
-        )} */}
-        <PricingCard />
+        <Suspense fallback={<PricingCardLoading />}>
+          <PricingCard />
+        </Suspense>
       </main>
     </div>
   );

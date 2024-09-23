@@ -1,15 +1,17 @@
-import ChatBox from "@/components/chat/ChatBox";
-import MyChats from "@/components/chat/MyChats";
-import SideDrawer from "@/components/chat/SideDrawer";
+import Loading from "@/components/Loading";
 import { useAuth } from "@/hooks/useAuth";
 import { Box } from "@chakra-ui/react";
+import { lazy, Suspense } from "react";
 
 const Chat = () => {
   const { user } = useAuth();
+  const SideDrawer = lazy(() => import("@/components/chat/SideDrawer"));
+  const MyChats = lazy(() => import("@/components/chat/MyChats"));
+  const ChatBox = lazy(() => import("@/components/chat/ChatBox"));
 
   return (
     <div className="w-full">
-      {user && <SideDrawer />}
+      <Suspense fallback={<Loading />}>{user && <SideDrawer />}</Suspense>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -17,8 +19,8 @@ const Chat = () => {
         h="91.5vh"
         p="10px"
       >
-        {user && <MyChats />}
-        {user && <ChatBox />}
+        <Suspense fallback={<Loading />}>{user && <MyChats />}</Suspense>
+        <Suspense fallback={<Loading />}>{user && <ChatBox />}</Suspense>
       </Box>
     </div>
   );

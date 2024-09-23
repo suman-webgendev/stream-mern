@@ -1,12 +1,13 @@
 import Loading from "@/components/Loading";
-import VideoPlayer from "@/components/VideoPlayer";
 import VideoTitle from "@/components/VideoTitle";
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 
 const VideoPage = () => {
   const location = useLocation();
   const { title, videoId, owner } = location.state || {};
+
+  const VideoPlayer = lazy(() => import("@/components/VideoPlayer"));
 
   return (
     <>

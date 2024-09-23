@@ -1,11 +1,12 @@
 import Loading from "@/components/Loading";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import VideoList from "@/components/VideoList";
 import { api } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { lazy, Suspense } from "react";
 
 const Home = () => {
+  const VideoList = lazy(() => import("@/components/VideoList"));
   const {
     data: videos,
     error,
@@ -37,7 +38,9 @@ const Home = () => {
       transition={{ duration: 0.5 }}
     >
       <ScrollArea className="h-[94vh] rounded-md border pb-6">
-        <VideoList videos={videos} />
+        <Suspense fallback={<Loading />}>
+          <VideoList videos={videos} />
+        </Suspense>
       </ScrollArea>
     </motion.div>
   );
