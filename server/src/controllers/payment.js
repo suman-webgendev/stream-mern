@@ -153,45 +153,79 @@ export const stripeWebhook = async (req, res) => {
         break;
       }
 
+      //! Subscription updated
+      case "customer.subscription.updated":
+        {
+          const updatedSubscription = event.data.object;
+          const updatedUser = await getUserByStripeCustomerId(
+            updatedSubscription.customer
+          );
+          const previousStatus = updatedSubscription.status;
+
+          if (updatedUser) {
+            console.log(
+              "Subscription update event received:",
+              JSON.stringify(updatedSubscription, null, 2)
+            );
+
+            if (
+              updatedSubscription.status === "canceled" ||
+              updatedSubscription.cancel_at_period_end
+            ) {
+              console.log(
+                "Cancelled subscription or scheduled for cancellation"
+              );
+              await updatedUser.updateSubscription(
+                "free",
+                updatedSubscription.cancel_at_period_end
+                  ? "active"
+                  : "canceled",
+                null,
+                0,
+                updatedSubscription.cancel_at_period_end
+                  ? new Date(updatedSubscription.current_period_end * 1000)
+                  : null
+              );
+              logger.success(
+                `Cancelled subscription for user ${updatedUser._id} (cancel_at_period_end: ${updatedSubscription.cancel_at_period_end})`
+              );
+            } else {
+              console.log("Updated subscription");
+              await updatedUser.updateSubscription(
+                await subscriptionMap(updatedSubscription.plan.amount_total),
+                updatedSubscription.status,
+                updatedSubscription.id,
+                Number(updatedSubscription.plan.amount) / 100,
+                new Date(updatedSubscription.current_period_end * 1000)
+              );
+              logger.success(
+                `Updated subscription for user ${updatedUser._id} from ${previousStatus} to ${updatedSubscription.status}`
+              );
+            }
+          }
+        }
+        break;
+
       //! Subscription canceled
       case "customer.subscription.deleted":
-        const deletedSubscription = event.data.object;
-        const userWithDeletedSub = await getUserByStripeCustomerId(
-          deletedSubscription.customer
-        );
-        if (userWithDeletedSub) {
-          await userWithDeletedSub.updateSubscription(
-            "free",
-            "canceled",
-            null,
-            0,
-            null
+        {
+          const deletedSubscription = event.data.object;
+          const user = await getUserByStripeCustomerId(
+            deletedSubscription.customer
           );
-          logger.success(
-            `Cancelled subscription for user ${userWithDeletedSub._id}`
-          );
+
+          if (user) {
+            console.log(
+              "Subscription deleted event received:",
+              JSON.stringify(deletedSubscription, null, 2)
+            );
+            await user.updateSubscription("free", "canceled", null, 0, null);
+            logger.success(
+              `Cancelled subscription for user ${user._id} due to deletion`
+            );
+          }
         }
         break;
-
-      //! Subscription updated
-      case "customer.subscription.updated": {
-        const updatedSubscription = event.data.object;
-        const updatedUser = await getUserByStripeCustomerId(
-          updatedSubscription.customer
-        );
-
-        if (updatedUser) {
-          await updatedUser.updateSubscription(
-            await subscriptionMap(updatedSubscription.plan.amount_total),
-            updatedSubscription.status,
-            updatedSubscription.id,
-            Number(updatedSubscription.plan.amount) / 100,
-            new Date(updatedSubscription.current_period_end * 1000)
-          );
-          logger.success(`Updated subscription for user ${updatedUser._id}`);
-        }
-        break;
-      }
 
       //! Subscription created
       case "customer.subscription.created":
