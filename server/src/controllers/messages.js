@@ -6,9 +6,10 @@ import { logger } from "../utils/index.js";
 /**
  * This function takes `req` and `res` as input. It extracts `currentUserId` from `req.identity` and also extracts `messageContent`, `chatId` and `chatType` from `req` body.
  * It sends the message to the particular chat and updates the database.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const sendMessage = async (req, res) => {
   try {
@@ -48,9 +49,10 @@ export const sendMessage = async (req, res) => {
 /**
  * This function takes `req` and `res` as input. It extracts the `page` and `chatId` from the `req` body.
  * It fetches all the messages and returns chats with `20` messages per page.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const allMessages = async (req, res) => {
   try {

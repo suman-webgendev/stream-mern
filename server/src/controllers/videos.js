@@ -1,6 +1,6 @@
 "use strict";
 
-import fs, { ReadStream } from "fs";
+import fs from "fs";
 import mongoose from "mongoose";
 import multer from "multer";
 import { promisify } from "util";
@@ -19,9 +19,10 @@ const upload = multer({
 
 /**
  * This function takes a video and title from the request body and writes it on the disk.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * 
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const uploadVideo = async (req, res) => {
   const uploadSingle = promisify(upload.single("video"));
@@ -78,9 +79,10 @@ export const uploadVideo = async (req, res) => {
 
 /**
  * This function returns a list of the videos available.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * 
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const getAllVideos = async (req, res) => {
   try {
@@ -109,10 +111,11 @@ export const getAllVideos = async (req, res) => {
 };
 
 /**
- * This function takes an id as input parameter from the request parameter and streams the video
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<ReadStream>}
+ * This function takes an id as input parameter from the request parameter and streams the video.
+ * 
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const getVideo = async (req, res) => {
   try {

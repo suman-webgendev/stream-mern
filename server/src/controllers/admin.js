@@ -15,9 +15,9 @@ dotenv.config();
 
 /**
  * Renders login page for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const renderLoginPage = async (req, res) => {
   try {
@@ -40,9 +40,9 @@ export const renderLoginPage = async (req, res) => {
 
 /**
  * This function handles login action for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const handleLogin = async (req, res) => {
   try {
@@ -105,9 +105,9 @@ export const handleLogin = async (req, res) => {
 
 /**
  * Renders dashboard page for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const dashboard = async (req, res) => {
   try {
@@ -133,9 +133,9 @@ export const dashboard = async (req, res) => {
 
 /**
  * Returns video list as data-table for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const videos = async (req, res) => {
   try {
@@ -169,9 +169,9 @@ export const videos = async (req, res) => {
 
 /**
  * Renders video upload page for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const displayUploadVideo = async (req, res) => {
   return res.render("upload", { currentPage: "videos" });
@@ -179,9 +179,9 @@ export const displayUploadVideo = async (req, res) => {
 
 /**
  * Renders add user page for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const displayAddUser = async (req, res) => {
   return res.render("adduser", { currentPage: "users" });
@@ -189,9 +189,9 @@ export const displayAddUser = async (req, res) => {
 
 /**
  * Renders user list as data-table for admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const users = async (req, res) => {
   try {
@@ -211,9 +211,9 @@ export const users = async (req, res) => {
 
 /**
  * Handles logout action for the admin.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const adminLogout = async (req, res) => {
   try {

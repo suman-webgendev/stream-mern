@@ -7,10 +7,11 @@ import { logger, stripe, subscriptionMap } from "../utils/index.js";
 dotenv.config();
 
 /**
- * Returns all the plans along with prices (monthly, yearly)
- * @param {Request} _req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * Returns all the plans along with prices (monthly, yearly).
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const getAllStripePlans = async (_req, res) => {
   try {
@@ -40,9 +41,10 @@ export const getAllStripePlans = async (_req, res) => {
 
 /**
  * Create a subscription for a existing customer or create customer and create subscription.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const createSubscription = async (req, res) => {
   const { priceId } = req.body;
@@ -85,10 +87,31 @@ export const createSubscription = async (req, res) => {
 };
 
 /**
- * This function creates webhook for stripe payment.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * This function creates webhook for stripe payment. It retrieves the `stripe signature` and then uses it to verify the `webhook request`. If the request is valid, it processes the event and updates the database accordingly. It checks the event type and handles each case accordingly. It handles the following events:
+ * - `checkout.session.completed`: When a new subscription is created.
+ * - `customer.subscription.updated`: When a subscription is updated.
+ * - `customer.subscription.deleted`: When a subscription is canceled.
+ * - `invoice.payment_failed`: When a payment fails due to insufficient funds or card declined.
+ * - `invoice.payment_succeeded`: When a payment succeeds.
+ * - `invoice.created`: When an invoice is created.
+ * - `invoice.finalized`: When an invoice is finalized.
+ * - `invoice.updated`: When an invoice is updated.
+ * - `invoice.paid`: When an invoice is paid.
+ * - `payment_intent.created`: When a payment intent is created.
+ * - `payment_intent.succeeded`: When a payment intent is succeeded.
+ * - `payment_method.attached`: When a payment method is attached.
+ * - `charge.succeeded`: When a charge is succeeded.
+ * - `customer.subscription.created`: When a subscription is created.
+ *
+ * To run this webhook on local system, install `stripe-cli` and login to your stripe account. Then, run the following command:
+ * ```bash
+ * stripe listen --forward-to localhost:8080/api/subscriptions/webhook
+ * ```
+ * For production, just add the `webhook url` to `https://<your_api_url>/api/subscriptions/webhook` to the stripe webhook settings.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -105,78 +128,142 @@ export const stripeWebhook = async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  switch (event.type) {
-    //! Subscription started
-    case "checkout.session.completed":
-      logger.success("A new subscription was created");
-      const session = event.data.object;
+  try {
+    switch (event.type) {
+      //! Subscription started
+      case "checkout.session.completed": {
+        logger.success("A new subscription was created");
+        const session = event.data.object;
 
-      const subscription = await stripe.subscriptions.retrieve(
-        session.subscription
-      );
-
-      const user = await getUserByStripeCustomerId(session.customer);
-      if (user) {
-        await user.updateSubscription(
-          subscription.plan.nickname || "free",
-          subscription.status,
-          subscription.id,
-          subscription.plan.amount
+        const subscription = await stripe.subscriptions.retrieve(
+          session.subscription
         );
-        logger.success(`Updated subscription for user ${user._id}`);
+        const user = await getUserByStripeCustomerId(session.customer);
+
+        if (user) {
+          await user.updateSubscription(
+            await subscriptionMap(subscription.plan.amount_total),
+            subscription.status,
+            subscription.id,
+            Number(subscription.plan.amount) / 100,
+            new Date(subscription.current_period_end * 1000)
+          );
+          logger.success(`Updated subscription for user ${user._id}`);
+        }
+        break;
       }
-      break;
 
-    //! Subscription updated
-    case "customer.subscription.updated":
-      const updatedSubscription = event.data.object;
-      const updatedUser = await getUserByStripeCustomerId(
-        updatedSubscription.customer
-      );
-      if (updatedUser) {
-        await updatedUser.updateSubscription(
-          updatedSubscription.plan.nickname || "free",
-          updatedSubscription.status,
-          updatedSubscription.id,
-          updatedSubscription.plan.amount
+      //! Subscription canceled
+      case "customer.subscription.deleted":
+        const deletedSubscription = event.data.object;
+        const userWithDeletedSub = await getUserByStripeCustomerId(
+          deletedSubscription.customer
         );
-        logger.success(`Updated subscription for user ${updatedUser._id}`);
+        if (userWithDeletedSub) {
+          await userWithDeletedSub.updateSubscription(
+            "free",
+            "canceled",
+            null,
+            0,
+            null
+          );
+          logger.success(
+            `Cancelled subscription for user ${userWithDeletedSub._id}`
+          );
+        }
+        break;
+
+      //! Subscription updated
+      case "customer.subscription.updated": {
+        const updatedSubscription = event.data.object;
+        const updatedUser = await getUserByStripeCustomerId(
+          updatedSubscription.customer
+        );
+
+        if (updatedUser) {
+          await updatedUser.updateSubscription(
+            await subscriptionMap(updatedSubscription.plan.amount_total),
+            updatedSubscription.status,
+            updatedSubscription.id,
+            Number(updatedSubscription.plan.amount) / 100,
+            new Date(updatedSubscription.current_period_end * 1000)
+          );
+          logger.success(`Updated subscription for user ${updatedUser._id}`);
+        }
+        break;
       }
-      break;
 
-    //! Subscription canceled
-    case "customer.subscription.deleted":
-      const deletedSubscription = event.data.object;
-      const userWithDeletedSub = await getUserByStripeCustomerId(
-        deletedSubscription.customer
-      );
-      if (userWithDeletedSub) {
-        await userWithDeletedSub.updateSubscription(
-          "free",
-          "canceled",
-          null,
-          0
+      //! Subscription created
+      case "customer.subscription.created":
+        logger.info(`Subscription created: ${event.data.object.id}`);
+        break;
+
+      //! Charge succeeded
+      case "charge.succeeded":
+        logger.info(
+          `Charge succeeded for ${event.data.object.amount / 100} ${
+            event.data.object.currency
+          }`
         );
-        logger.success(
-          `Cancelled subscription for user ${userWithDeletedSub._id}`
+        break;
+
+      case "billing_portal.session.created":
+        logger.info(`Billing portal session created: ${event.data.object.id}`);
+        break;
+
+      //! Payment method attached
+      case "payment_method.attached":
+        logger.info(`Payment method attached: ${event.data.object.id}`);
+        break;
+
+      //! Payment intent created
+      case "payment_intent.created":
+        logger.info(`Payment intent created: ${event.data.object.id}`);
+        break;
+
+      //! Payment intent succeeded
+      case "payment_intent.succeeded":
+        logger.info(`Payment intent succeeded: ${event.data.object.id}`);
+        break;
+
+      //! Invoice created
+      case "invoice.created":
+        logger.info(`Invoice created: ${event.data.object.id}`);
+        break;
+
+      //! Invoice finalized
+      case "invoice.finalized":
+        logger.info(`Invoice finalized: ${event.data.object.id}`);
+        break;
+
+      //! Invoice updated
+      case "invoice.updated":
+        logger.info(`Invoice updated: ${event.data.object.id}`);
+        break;
+
+      //! Invoice paid
+      case "invoice.paid":
+        logger.info(`Invoice paid: ${event.data.object.id}`);
+        break;
+
+      //! Payment succeeded (Alternative handling)
+      case "invoice.payment_succeeded":
+        logger.info(`Invoice payment succeeded for: ${event.data.object.id}`);
+        break;
+
+      //! Payment failed in a subscription interval (monthly, yearly, etc.)
+      case "invoice.payment_failed":
+        logger.error(
+          "Payment failed due to insufficient funds or card declined"
         );
-      }
-      break;
+        break;
 
-    //! Payment succeeded in every subscription interval (monthly, yearly, etc.)
-    case "invoice.paid":
-      console.log("Payment succeeded in every subscription interval");
-      console.log(event.data.object);
-      break;
-
-    //! Payment failed due to insufficient funds or card declined in a subscription interval (monthly, yearly, etc.)
-    case "invoice.payment_failed":
-      console.log("Payment failed due to insufficient funds or card declined");
-      console.log(event.data.object);
-      break;
-
-    default:
-      logger.info(`Unhandled event type: ${event.type}`);
+      default:
+        logger.info(`Unhandled event type: ${event.type}`);
+    }
+  } catch (error) {
+    logger.error(`Error processing event ${event.type}: ${error.message}`);
+    return res.status(500).send("Webhook handler failed");
   }
 
   return res.json({ received: true });
@@ -185,9 +272,10 @@ export const stripeWebhook = async (req, res) => {
 /**
  * This function takes `sessionId` and `currentUserId` from `req` body and checks the `stripe` checkout session.
  * If the checkout payment status is `paid`, it update the database with the `plan`, `status` and `subscriptionId`.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const verifySession = async (req, res) => {
   const { sessionId } = req.body;
@@ -198,17 +286,25 @@ export const verifySession = async (req, res) => {
 
     if (session.payment_status === "paid") {
       const user = await getUserById(currentUser);
-
       if (!user) {
         return res.json({ verified: false });
       }
+
+      const subscription = await stripe.subscriptions.retrieve(
+        session.subscription
+      );
+
       const plan = await subscriptionMap(session.amount_total);
+      const subscriptionEndDate = new Date(
+        subscription.current_period_end * 1000
+      );
 
       await user.updateSubscription(
         plan,
         "active",
         session.subscription,
-        Number(session.amount_total) / 100
+        Number(session.amount_total) / 100,
+        subscriptionEndDate
       );
 
       await user.save();
@@ -224,10 +320,11 @@ export const verifySession = async (req, res) => {
 };
 
 /**
- * Creates a Stripe billing portal session for the current user
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * Creates a Stripe billing portal session for the current user.
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const createBillingPortalSession = async (req, res) => {
   const currentUser = req.identity._id;

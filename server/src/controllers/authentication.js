@@ -13,9 +13,9 @@ dotenv.config();
 
 /**
  * Handles register action
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const register = async (req, res) => {
   try {
@@ -53,9 +53,9 @@ export const register = async (req, res) => {
 
 /**
  * Handles login action
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const login = async (req, res) => {
   try {
@@ -106,9 +106,9 @@ export const login = async (req, res) => {
 
 /**
  * Handles logout action
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const logout = async (req, res) => {
   try {
@@ -141,9 +141,9 @@ export const logout = async (req, res) => {
 
 /**
  * Checks if a user logged in or not
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const authCheck = async (req, res) => {
   try {

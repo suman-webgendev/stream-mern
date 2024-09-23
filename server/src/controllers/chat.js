@@ -2,10 +2,10 @@ import { db } from "../db/index.js";
 import { logger } from "../utils/index.js";
 
 /**
- * Get the chat between two user if doesn't exist create one.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * Fetch the chat between two user if doesn't exist create one.
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const accessChats = async (req, res) => {
   try {
@@ -64,9 +64,9 @@ export const accessChats = async (req, res) => {
 
 /**
  * Get all the chats for a user.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const getAllChats = async (req, res) => {
   const currentUser = req.identity._id;
@@ -106,9 +106,9 @@ export const getAllChats = async (req, res) => {
 
 /**
  * Search users.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const searchUser = async (req, res) => {
   try {
@@ -138,10 +138,10 @@ export const searchUser = async (req, res) => {
 };
 
 /**
- * Create group chat.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * Creates group chat.
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const createGroupChat = async (req, res) => {
   try {
@@ -191,10 +191,10 @@ export const createGroupChat = async (req, res) => {
 };
 
 /**
- * Rename group.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * Rename a group.
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const renameGroup = async (req, res) => {
   try {
@@ -232,9 +232,9 @@ export const renameGroup = async (req, res) => {
 
 /**
  * Remove a member from the group.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const removeFromGroup = async (req, res) => {
   try {
@@ -279,9 +279,9 @@ export const removeFromGroup = async (req, res) => {
 
 /**
  * Add a member to the group.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const addToGroup = async (req, res) => {
   try {

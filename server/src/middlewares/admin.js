@@ -10,10 +10,10 @@ const { merge } = pkg;
  * This middleware takes `req`, `res` and `next` as input. It uses the cookie to check if admin is authenticated or not.
  * If admin is authenticated the it returns the admin object and calls the next function.
  *
- * @param {Request} req
- * @param {Response} res
- * @param {express.NextFunction} next
- * @returns {express.NextFunction}
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @param {express.NextFunction} next - The next function to call in the middleware chain.
+ * @returns {express.NextFunction} - The next function to call in the middleware chain.
  */
 export const isAuthenticatedAdmin = async (req, res, next) => {
   try {

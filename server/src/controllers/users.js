@@ -5,9 +5,10 @@ import { logger } from "../utils/index.js";
 
 /**
  * This function returns a list of the users.
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ *
+ * @param {Request} req - The incoming request object.
+ * @param {Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
  */
 export const getAllUsers = async (req, res) => {
   try {
