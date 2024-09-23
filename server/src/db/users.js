@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
     default: "none",
   },
   subscriptionId: { type: String },
+  subscriptionEndAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -34,12 +35,14 @@ userSchema.methods.updateSubscription = function (
   plan,
   status,
   subscriptionId,
-  subscriptionAmount
+  subscriptionAmount,
+  subscriptionEndAt
 ) {
   this.subscriptionPlan = plan;
   this.subscriptionStatus = status;
   this.subscriptionId = subscriptionId;
   this.subscriptionAmount = subscriptionAmount;
+  this.subscriptionEndAt = subscriptionEndAt;
   this.updatedAt = new Date();
   return this.save();
 };
