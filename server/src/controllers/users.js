@@ -4,7 +4,8 @@ import { getUsers } from "../actions/users.js";
 import { logger } from "../utils/index.js";
 
 /**
- * This function returns a list of the users.
+ * This function returns a list of all users in the database.
+ * It extracts the logged-in user's ID from the request identity, checks if the user exists, and if the user is not the group admin. If all conditions are met, it returns a list of all users in the database.
  *
  * @param {Request} req - The incoming request object.
  * @param {Response} res - The outgoing response object.

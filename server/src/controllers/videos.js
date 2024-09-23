@@ -18,8 +18,8 @@ const upload = multer({
 });
 
 /**
- * This function takes a video and title from the request body and writes it on the disk.
- * 
+ * This function takes a video and title from the request body and writes it on the disk. It also generates a thumbnail for the video. It extracts the logged-in user's ID from the request identity, checks if the user exists, and if the user is not the group admin. If all conditions are met, it creates a new video and returns the saved video to the client.
+ *
  * @param {Request} req - The incoming request object.
  * @param {Response} res - The outgoing response object.
  * @returns {Promise<Response>} - A Promise that resolves to the response object.
@@ -78,8 +78,8 @@ export const uploadVideo = async (req, res) => {
 };
 
 /**
- * This function returns a list of the videos available.
- * 
+ * This function returns a list of all videos in the database. It extracts the logged-in user's ID from the request identity, checks if the user exists, and if the user is not the group admin. If all conditions are met, it returns a list of all videos in the database.
+ *
  * @param {Request} req - The incoming request object.
  * @param {Response} res - The outgoing response object.
  * @returns {Promise<Response>} - A Promise that resolves to the response object.
@@ -111,8 +111,8 @@ export const getAllVideos = async (req, res) => {
 };
 
 /**
- * This function takes an id as input parameter from the request parameter and streams the video.
- * 
+ * This function takes an id as input parameter from the request parameter and streams the video. It extracts the `id` from the request parameter, checks if the `id` is valid, and if the `id` is not empty. If all conditions are met, it streams the video and returns the video to the client.
+ *
  * @param {Request} req - The incoming request object.
  * @param {Response} res - The outgoing response object.
  * @returns {Promise<Response>} - A Promise that resolves to the response object.
