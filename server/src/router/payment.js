@@ -3,6 +3,7 @@
 import express, { Router } from "express";
 import {
   createBillingPortalSession,
+  createPaymentIntent,
   createSubscription,
   getAllStripePlans,
   stripeWebhook,
@@ -52,5 +53,14 @@ export default (router) => {
     isAuthenticated,
     rateLimiter(),
     createBillingPortalSession
+  );
+
+  //---------------------------------Custom Checkout Form------------------------------------
+
+  router.post(
+    "/api/subscription/create-payment-intent",
+    isAuthenticated,
+    rateLimiter(),
+    createPaymentIntent
   );
 };

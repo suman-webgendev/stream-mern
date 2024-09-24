@@ -385,3 +385,31 @@ export const createBillingPortalSession = async (req, res) => {
     });
   }
 };
+
+//---------------------------------------Custom Checkout Form----------------------------------
+
+/**
+ * Description
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<Response>}
+ */
+export const createPaymentIntent = async (req, res) => {
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      customer: req.identity.stripeCustomerId,
+      amount: 1000,
+      currency: "usd",
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+    res.status(201).json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    logger.error("[PAYMENT_INTENT]: ", err);
+    return res.status(500).json({
+      message: "Failed to create payment intent.",
+      redirectUrl: `${process.env.CLIENT_URL}/pricing?status=failed`,
+    });
+  }
+};
