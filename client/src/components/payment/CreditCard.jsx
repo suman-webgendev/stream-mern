@@ -1,357 +1,225 @@
-import { cn } from "@/lib/utils";
-import "@/styles/creditCard.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { cardSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import {
+  CardCvcElement,
+  CardExpiryElement,
+  CardNumberElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 const CreditCard = () => {
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardMonth, setCardMonth] = useState("");
-  const [cardYear, setCardYear] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
-  const [isCardFlipped, setIsCardFlipped] = useState(false);
-  const [focusElementStyle, setFocusElementStyle] = useState(null);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState(null);
 
-  const minCardYear = useMemo(() => new Date().getFullYear(), []);
-  const currentCardBackground = useMemo(
-    () => Math.floor(Math.random() * 25 + 1),
-    [],
-  );
-  const amexCardMask = "#### ###### #####";
-  const otherCardMask = "#### #### #### ####";
-
-  const cardNumberRef = useRef(null);
-  const cardNameRef = useRef(null);
-  const cardDateRef = useRef(null);
-
-  useEffect(() => {
-    cardNumberRef.current.focus();
-  }, []);
-
-  const getCardType = useCallback(() => {
-    let number = cardNumber;
-    let re;
-    re = new RegExp("^4");
-    if (number.match(re) != null) return "visa";
-    re = new RegExp("^(34|37)");
-    if (number.match(re) != null) return "amex";
-    re = new RegExp("^5[1-5]");
-    if (number.match(re) != null) return "mastercard";
-    re = new RegExp("^6011");
-    if (number.match(re) != null) return "discover";
-    re = new RegExp("^9792");
-    if (number.match(re) != null) return "troy";
-    re = new RegExp("^(36|38|39)");
-    if (number.match(re) != null) return "dinersclub";
-    re = new RegExp("^(35)");
-    if (number.match(re) != null) return "jcb";
-    re = new RegExp("^(62)");
-    if (number.match(re) != null) return "unionpay";
-    return "visa";
-  }, [cardNumber]);
-
-  const generateCardNumberMask = useCallback(() => {
-    return getCardType() === "amex" ? amexCardMask : otherCardMask;
-  }, [getCardType]);
-
-  const minCardMonth = useCallback(() => {
-    if (cardYear === minCardYear.toString()) return new Date().getMonth() + 1;
-    return 1;
-  }, [cardYear, minCardYear]);
-
-  useEffect(() => {
-    if (cardMonth < minCardMonth()) {
-      setCardMonth("");
-    }
-  }, [cardMonth, minCardMonth]);
-
-  const flipCard = (status) => {
-    setIsCardFlipped(status);
-  };
-
-  const focusInput = useCallback((e) => {
-    setIsInputFocused(true);
-    let targetRef = e.target.dataset.ref;
-    let target;
-    if (targetRef === "cardNumber") target = cardNumberRef.current;
-    if (targetRef === "cardName") target = cardNameRef.current;
-    if (targetRef === "cardDate") target = cardDateRef.current;
-
-    setFocusElementStyle({
-      width: `${target.offsetWidth}px`,
-      height: `${target.offsetHeight}px`,
-      transform: `translateX(${target.offsetLeft}px) translateY(${target.offsetTop}px)`,
-    });
-  }, []);
-
-  const blurInput = () => {
-    setTimeout(() => {
-      if (!isInputFocused) {
-        setFocusElementStyle(null);
-      }
-    }, 300);
-    setIsInputFocused(false);
-  };
-
-  const maskCardNumber = useCallback(
-    (value) => {
-      const mask = generateCardNumberMask();
-      let maskedValue = "";
-      let index = 0;
-
-      for (let i = 0; i < mask.length; i++) {
-        if (mask[i] === "#") {
-          if (value[index]) {
-            maskedValue += value[index];
-            index++;
-          } else {
-            break;
-          }
-        } else {
-          if (value[index]) {
-            maskedValue += mask[i];
-          } else {
-            break;
-          }
-        }
-      }
-
-      return maskedValue;
+  const form = useForm({
+    resolver: zodResolver(cardSchema),
+    defaultValues: {
+      name: "",
+      phoneNumber: "",
+      postalCode: "",
     },
-    [generateCardNumberMask],
-  );
+  });
 
-  const handleCardNumberChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-    const maskedValue = maskCardNumber(value);
-    setCardNumber(maskedValue);
+  const generateStripeToken = async (values) => {
+    if (!stripe || !elements) return;
+
+    const cardElement = elements.getElement(CardNumberElement);
+    const { error, token } = await stripe.createToken(cardElement, {
+      name: values.name,
+      address_zip: values.postalCode,
+      phone: values.phoneNumber,
+    });
+
+    if (!token || error) {
+      console.error("Error creating token:", error);
+      throw error;
+    }
+
+    return token;
+  };
+
+  const onSubmit = async (values) => {
+    try {
+      console.log(form.formState);
+      const token = await generateStripeToken(values);
+      console.log(token);
+      setError(null);
+      form.reset();
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (
-    <div className="wrapper">
-      <div className="card-form">
-        <div className="card-list">
-          <div className={cn("card-item", isCardFlipped && "-active")}>
-            <div className="card-item__side -front">
-              <div
-                className={cn(
-                  "card-item__focus",
-                  focusElementStyle && "-active",
-                )}
-                style={focusElementStyle}
-              ></div>
-              <div className="card-item__cover">
-                <img
-                  src={`/cardBackgrounds/${currentCardBackground}.webp`}
-                  className="card-item__bg"
-                />
-              </div>
-
-              <div className="card-item__wrapper">
-                <div className="card-item__top">
-                  <img src="/chip.png" className="card-item__chip" />
-                  <div className="card-item__type">
-                    <img
-                      src={`/cards/${getCardType()}.png`}
-                      alt=""
-                      className="card-item__typeImg"
-                    />
-                  </div>
-                </div>
-                <label
-                  htmlFor="cardNumber"
-                  className="card-item__number"
-                  ref={cardNumberRef}
-                >
-                  {cardNumber.split("").map((n, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "card-item__numberItem",
-                        n.trim() === "" && "-active",
-                      )}
-                    >
-                      {index > 4 &&
-                      index < 15 &&
-                      cardNumber.length > index &&
-                      n.trim() !== ""
-                        ? "*"
-                        : n}
-                    </div>
-                  ))}
-                </label>
-                <div className="card-item__content">
-                  <label
-                    htmlFor="cardName"
-                    className="card-item__info"
-                    ref={cardNameRef}
-                  >
-                    <div className="card-item__holder">Card Holder</div>
-                    <div className="card-item__name">
-                      {cardName.length
-                        ? cardName
-                            .replace(/\s\s+/g, " ")
-                            .split("")
-                            .map((n, index) => (
-                              <span key={index} className="card-item__nameItem">
-                                {n}
-                              </span>
-                            ))
-                        : "Full Name"}
-                    </div>
-                  </label>
-                  <div className="card-item__date" ref={cardDateRef}>
-                    <label htmlFor="cardMonth" className="card-item__dateTitle">
-                      Expires
-                    </label>
-                    <label htmlFor="cardMonth" className="card-item__dateItem">
-                      <span>{cardMonth || "MM"}</span>
-                    </label>
-                    /
-                    <label htmlFor="cardYear" className="card-item__dateItem">
-                      <span>
-                        {cardYear ? String(cardYear).slice(2, 4) : "YY"}
+    <Card className="mx-auto w-[28rem] max-w-[90vw]">
+      <CardContent>
+        <Form {...form}>
+          <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="grid gap-4 py-4">
+              {/* Name Field */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="John Doe"
+                        type="text"
+                        className="w-full invalid:text-red-500"
+                        {...field}
+                        autoComplete="off"
+                      />
+                    </FormControl>
+                    {form.formState.errors.name && (
+                      <span className="text-xs text-red-600">
+                        {form.formState.errors.name.message}
                       </span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-item__side -back">
-              <div className="card-item__cover">
-                <img
-                  src={`/cardBackgrounds/${currentCardBackground}.webp`}
-                  className="card-item__bg"
-                />
-              </div>
-              <div className="card-item__band"></div>
-              <div className="card-item__cvv">
-                <div className="card-item__cvvTitle">CVV</div>
-                <div className="card-item__cvvBand">
-                  {cardCvv.split("").map((n, index) => (
-                    <span key={index}>*</span>
-                  ))}
-                </div>
-                <div className="card-item__type">
-                  <img
-                    src={`/cards/${getCardType()}.png`}
-                    className="card-item__typeImg"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="card-form__inner">
-          <div className="card-input">
-            <label htmlFor="cardNumber" className="card-input__label">
-              Card Number
-            </label>
-            <input
-              type="text"
-              id="cardNumber"
-              className="card-input__input"
-              value={cardNumber}
-              onChange={handleCardNumberChange}
-              onFocus={focusInput}
-              onBlur={blurInput}
-              data-ref="cardNumber"
-              autoComplete="off"
-              maxLength={19}
-            />
-          </div>
-          <div className="card-input">
-            <label htmlFor="cardName" className="card-input__label">
-              Card Holders
-            </label>
-            <input
-              type="text"
-              id="cardName"
-              className="card-input__input"
-              value={cardName}
-              onChange={(e) => setCardName(e.target.value)}
-              onFocus={focusInput}
-              onBlur={blurInput}
-              data-ref="cardName"
-              autoComplete="off"
-            />
-          </div>
-          <div className="card-form__row">
-            <div className="card-form__col">
-              <div className="card-form__group">
-                <label htmlFor="cardMonth" className="card-input__label">
-                  Expiration Date
-                </label>
-                <select
-                  className="card-input__input -select"
-                  id="cardMonth"
-                  value={cardMonth}
-                  onChange={(e) => setCardMonth(e.target.value)}
-                  onFocus={focusInput}
-                  onBlur={blurInput}
-                  data-ref="cardDate"
-                >
-                  <option value="" disabled>
-                    Month
-                  </option>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-                    <option
-                      key={n}
-                      value={n < 10 ? `0${n}` : n}
-                      disabled={n < minCardMonth()}
-                    >
-                      {n < 10 ? `0${n}` : n}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="card-input__input -select"
-                  id="cardYear"
-                  value={cardYear}
-                  onChange={(e) => setCardYear(e.target.value)}
-                  onFocus={focusInput}
-                  onBlur={blurInput}
-                  data-ref="cardDate"
-                >
-                  <option value="" disabled>
-                    Year
-                  </option>
-                  {Array.from({ length: 12 }, (_, i) => i + minCardYear).map(
-                    (n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </div>
-            </div>
-            <div className="card-form__col -cvv">
-              <div className="card-input">
-                <label htmlFor="cardCvv" className="card-input__label">
-                  CVV
-                </label>
-                <input
-                  type="text"
-                  className="card-input__input"
-                  id="cardCvv"
-                  maxLength="4"
-                  value={cardCvv}
-                  onChange={(e) =>
-                    setCardCvv(e.target.value.replace(/\D/g, ""))
-                  }
-                  onFocus={() => flipCard(true)}
-                  onBlur={() => flipCard(false)}
-                  autoComplete="off"
-                />
-              </div>
-            </div>
-          </div>
+                    )}
+                  </FormItem>
+                )}
+              />
 
-          <button className="card-form__button">Submit</button>
-        </div>
-      </div>
-    </div>
+              {/* Phone Number Field */}
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="off"
+                        type="number"
+                        onInput={(e) => {
+                          if (e.target.value.length > 12) {
+                            e.target.value = e.target.value.slice(0, 12);
+                          }
+                        }}
+                        className="w-full invalid:text-red-500"
+                        placeholder="(123) 456-7890"
+                        {...field}
+                      />
+                    </FormControl>
+                    {form.formState.errors.phoneNumber && (
+                      <span className="text-xs text-red-600">
+                        {form.formState.errors.phoneNumber.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="postalCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        autoComplete="off"
+                        type="number"
+                        placeholder="123456"
+                        className="w-full invalid:text-red-500"
+                        {...field}
+                        onInput={(e) => {
+                          if (e.target.value.length > 6) {
+                            e.target.value = e.target.value.slice(0, 6);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    {form.formState.errors.phoneNumber && (
+                      <span className="text-xs text-red-600">
+                        {form.formState.errors.phoneNumber.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              {/* Card Number Field */}
+              <FormField
+                control={form.control}
+                name="cardNumber"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Card Number</FormLabel>
+                    <FormControl>
+                      <CardNumberElement className="h-10 w-full rounded-md border border-input p-2 px-3 py-2 text-sm text-gray-700" />
+                    </FormControl>
+                    {form.formState.errors.cardNumber && (
+                      <span className="text-xs text-red-600">
+                        {form.formState.errors.cardNumber.message}
+                      </span>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              {/* Expiration Month and Year */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="expirationMonth"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>Expiration Date</FormLabel>
+                      <CardExpiryElement className="h-10 w-full rounded-md border border-input p-2 px-3 py-2 text-sm text-gray-700" />
+                    </FormItem>
+                  )}
+                />
+
+                {/* CVV Field */}
+                <FormField
+                  control={form.control}
+                  name="cvv"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>CVV</FormLabel>
+                      <FormControl>
+                        <CardCvcElement className="h-10 w-full rounded-md border border-input p-2 px-3 py-2 text-sm text-gray-700" />
+                      </FormControl>
+                      {form.formState.errors.cvv && (
+                        <span className="text-xs text-red-600">
+                          {form.formState.errors.cvv.message}
+                        </span>
+                      )}
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {error && (
+                <div className="flex items-center gap-x-2 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+                  <ExclamationTriangleIcon className="size-4" />
+                  <p className="text-red-500">{error}</p>
+                </div>
+              )}
+              <div>
+                <Button className="w-full">Pay</Button>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
