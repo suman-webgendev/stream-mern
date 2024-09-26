@@ -313,23 +313,51 @@ export const stripeWebhook = async (req, res) => {
  * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const verifySession = async (req, res) => {
-  const { sessionId } = req.body;
+  const { sessionId, subscriptionId } = req.body;
   const currentUser = req.identity._id;
 
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const user = await getUserById(currentUser);
+    if (!user) {
+      return res.json({ verified: false });
+    }
 
-    if (session.payment_status === "paid") {
-      const user = await getUserById(currentUser);
-      if (!user) {
+    if (sessionId) {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+      if (session.payment_status === "paid") {
+        const subscription = await stripe.subscriptions.retrieve(
+          session.subscription
+        );
+
+        const plan = await subscriptionMap(session.amount_total);
+        const subscriptionEndDate = new Date(
+          subscription.current_period_end * 1000
+        );
+
+        await user.updateSubscription(
+          plan,
+          "active",
+          session.subscription,
+          Number(session.amount_total) / 100,
+          subscriptionEndDate
+        );
+
+        await user.save();
+        logger.success(
+          "Subscription updated successfully for user " + user._id
+        );
+
+        return res.json({ verified: true });
+      } else {
         return res.json({ verified: false });
       }
+    }
+    if (subscriptionId) {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-      const subscription = await stripe.subscriptions.retrieve(
-        session.subscription
-      );
-
-      const plan = await subscriptionMap(session.amount_total);
+      console.log(subscription);
+      const plan = await subscriptionMap(subscription.plan.amount);
       const subscriptionEndDate = new Date(
         subscription.current_period_end * 1000
       );
@@ -337,17 +365,17 @@ export const verifySession = async (req, res) => {
       await user.updateSubscription(
         plan,
         "active",
-        session.subscription,
-        Number(session.amount_total) / 100,
+        subscription.id,
+        Number(subscription.plan.amount) / 100,
         subscriptionEndDate
       );
 
       await user.save();
 
+      logger.success("Subscription updated successfully for user " + user._id);
       return res.json({ verified: true });
-    } else {
-      return res.json({ verified: false });
     }
+    return res.json({ verified: false });
   } catch (error) {
     logger.error("Error verifying session:", error);
     return res.status(500).json({ message: "Failed to verify session." });
@@ -417,10 +445,12 @@ export const createPaymentIntent = async (req, res) => {
 };
 
 /**
- * Description
- * @param {express.Request} req
- * @param {express.Response} res
- * @returns {Promise<express.Response>}
+ * This functions create a checkout session for a customer using token received from user. It also retrieves the priceId from the request body.
+ * It then creates a checkout session for the customer and returns the subscription object.
+ *
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createCheckoutSession = async (req, res) => {
   const { token, priceId } = req.body;
@@ -441,7 +471,6 @@ export const createCheckoutSession = async (req, res) => {
     if (!user.stripeCustomerId) {
       const newCustomer = await stripe.customers.create({
         email: user.email,
-        source: token,
       });
 
       user.stripeCustomerId = newCustomer.id;
@@ -449,10 +478,30 @@ export const createCheckoutSession = async (req, res) => {
       logger.success("New stripe customer created!");
     }
 
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: "card",
+      card: { token: token.id },
+    });
+
+    await stripe.paymentMethods.attach(paymentMethod.id, {
+      customer: user.stripeCustomerId,
+    });
+
+    await stripe.customers.update(user.stripeCustomerId, {
+      invoice_settings: {
+        default_payment_method: paymentMethod.id,
+      },
+    });
+
     const subscription = await stripe.subscriptions.create({
       customer: user.stripeCustomerId,
       items: [{ price: priceId }],
+      default_payment_method: paymentMethod.id,
     });
+
+    logger.success(
+      "A new subscription was created successfully using custom checkout form!"
+    );
 
     return res.status(201).json({
       success: true,
@@ -460,8 +509,9 @@ export const createCheckoutSession = async (req, res) => {
     });
   } catch (error) {
     logger.error("[CHECKOUT_SESSION]: ", error);
-    return res.status(500).json({
-      message: "Failed to create checkout session.",
+
+    return res.status(400).json({
+      message: error.message,
     });
   }
 };
