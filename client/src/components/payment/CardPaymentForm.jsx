@@ -8,6 +8,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { api, formatAmount } from "@/lib/utils";
 import { cardSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
@@ -18,14 +19,19 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useLocation } from "react-router-dom";
 
-const CreditCard = () => {
+const CardPaymentForm = () => {
+  const [error, setError] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
-  const [error, setError] = useState(null);
+
+  const location = useLocation();
+  const { priceId, price } = location.state || {};
 
   const form = useForm({
     resolver: zodResolver(cardSchema),
@@ -37,33 +43,57 @@ const CreditCard = () => {
   });
 
   const generateStripeToken = async (values) => {
-    if (!stripe || !elements) return;
+    try {
+      if (!stripe || !elements) return;
 
-    const cardElement = elements.getElement(CardNumberElement);
-    const { error, token } = await stripe.createToken(cardElement, {
-      name: values.name,
-      address_zip: values.postalCode,
-      phone: values.phoneNumber,
-    });
+      const cardElement = elements.getElement(CardNumberElement);
+      const { error, token } = await stripe.createToken(cardElement, {
+        name: values.name,
+        address_zip: values.postalCode,
+        phone: values.phoneNumber.replace(/\D/g, ""),
+      });
 
-    if (!token || error) {
-      console.error("Error creating token:", error);
-      throw error;
+      if (!token || error) {
+        console.error("Error creating token:", error);
+        throw error;
+      }
+      return token;
+    } catch (err) {
+      console.error("Error generating Stripe token:", err);
+      setError(err.message);
     }
-    return token;
   };
 
   const stripeElementOptions = {
     showIcon: true,
   };
 
+  const subscriptionMutation = useMutation({
+    mutationFn: async (token) => {
+      if (!token || !priceId) return;
+      const { data } = await api.post("/api/subscription/checkout", {
+        token,
+        priceId,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      console.log("Subscription successful");
+    },
+    onError: (error) => {
+      console.log("Error", error);
+    },
+  });
+
   const onSubmit = async (values) => {
     try {
       const token = await generateStripeToken(values);
-      console.log(token);
+      const response = await subscriptionMutation.mutateAsync(token);
+      console.log(response);
       setError(null);
     } catch (error) {
-      setError(error.message);
+      console.log(error);
+      setError(error.response.data.message);
     }
   };
 
@@ -192,19 +222,19 @@ const CreditCard = () => {
                   )}
                 />
 
-                {/* CVV Field */}
+                {/* CVC Field */}
                 <FormField
                   control={form.control}
-                  name="cvv"
+                  name="cvc"
                   render={() => (
                     <FormItem>
-                      <FormLabel>CVV</FormLabel>
+                      <FormLabel>CVC</FormLabel>
                       <FormControl>
                         <CardCvcElement className="h-10 w-full rounded-md border px-3 py-2" />
                       </FormControl>
-                      {form.formState.errors.cvv && (
+                      {form.formState.errors.cvc && (
                         <span className="text-xs text-red-600">
-                          {form.formState.errors.cvv.message}
+                          {form.formState.errors.cvc.message}
                         </span>
                       )}
                     </FormItem>
@@ -225,7 +255,7 @@ const CreditCard = () => {
                       <Loader2 className="ml-2 size-5 animate-spin" />
                     </>
                   ) : (
-                    "Pay"
+                    `Pay ${formatAmount(price)}`
                   )}
                 </Button>
               </div>
@@ -237,4 +267,4 @@ const CreditCard = () => {
   );
 };
 
-export default CreditCard;
+export default CardPaymentForm;

@@ -94,3 +94,12 @@ export const formatPriceData = (apiResponse) => {
       return order.indexOf(a.title) - order.indexOf(b.title);
     });
 };
+
+export const formatAmount = (amount) => {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
