@@ -1,12 +1,13 @@
+import express from "express";
 import { db } from "../db/index.js";
 import { logger } from "../utils/index.js";
 
 /**
  * This function fetches the chat between two users if it doesn't exist, and creates one if it does. It extracts `userId` from the request `body`, checks if the user exists, and if the user is not the group admin. If all conditions are met, it returns the chat between the two users.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const accessChats = async (req, res) => {
   try {
@@ -66,9 +67,9 @@ export const accessChats = async (req, res) => {
 /**
  * This function returns a list of all chats for a user. It extracts the logged-in user's ID from the request identity, checks if the user exists, and if the user is not the group admin. If all conditions are met, it returns a list of all chats for the user.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const getAllChats = async (req, res) => {
   const currentUser = req.identity._id;
@@ -109,9 +110,9 @@ export const getAllChats = async (req, res) => {
 /**
  * This function searches for users based on the search term. It extracts the `search` parameter from the query string, checks if the search term is valid, and if the search term is not empty. If all conditions are met, it returns a list of users that match the search term.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const searchUser = async (req, res) => {
   try {
@@ -143,9 +144,9 @@ export const searchUser = async (req, res) => {
 /**
  * This function creates a new group chat. It extracts `name` and `users` from the request body, checks if the `name` is valid, and if the `users` are valid. If all conditions are met, it creates a new group chat and returns the updated group chat to the client.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createGroupChat = async (req, res) => {
   try {
@@ -197,9 +198,9 @@ export const createGroupChat = async (req, res) => {
 /**
  * This function renames a group. It extracts `groupId` and `groupName` from the request body, checks if the group exists, and if the `groupName` is valid. If all conditions are met, it updates the group name and returns the updated group to the client.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const renameGroup = async (req, res) => {
   try {
@@ -238,9 +239,9 @@ export const renameGroup = async (req, res) => {
 /**
  * This function removes a user from a group. It extracts `groupId` and `userId` from the request body, checks if the group exists, and if the user is in the group. If all conditions are met, it removes the user from the group and returns the updated group to the client.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const removeFromGroup = async (req, res) => {
   try {
@@ -286,9 +287,9 @@ export const removeFromGroup = async (req, res) => {
 /**
  * This function adds a user to a group. It extracts `groupId` and `userId` from the request body, checks if the group exists, and if the user is already in the group. If all conditions are met, it adds the user to the group and returns the updated group to the client.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const addToGroup = async (req, res) => {
   try {

@@ -55,7 +55,7 @@ export default (router) => {
     createBillingPortalSession
   );
 
-  //---------------------------------Custom Checkout Form------------------------------------
+  //*---------------------------------Custom Checkout Form------------------------------------
 
   router.post(
     "/api/subscription/create-payment-intent",

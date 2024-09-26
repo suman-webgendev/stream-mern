@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import colors from "colors";
 import crypto from "crypto";
 import dotenv from "dotenv";
+import express from "express";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
 import multer from "multer";
@@ -34,7 +35,7 @@ export const authentication = (salt, password) => {
 /**
  * This function takes `req`, `file` and `cb` as input and returns the upload path.
  *
- * @param {Request} req - The incoming request object.
+ * @param {express.Request} req - The incoming request object.
  * @param {File} file - The file object.
  * @param {Function} cb - The callback function.
  * @returns {string} - The upload path.

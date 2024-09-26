@@ -10,8 +10,8 @@ const { merge } = pkg;
  * This middleware takes `req`, `res` and `next` as input. It uses the cookie to check if user is authenticated or not.
  * If user is authenticated the it returns the user object and calls the next function. If user is not authenticated, it returns a 401 error and calls the next function.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
  * @param {express.NextFunction} next - The next function to call in the middleware chain.
  * @returns {express.NextFunction} - The next function to call in the middleware chain.
  */

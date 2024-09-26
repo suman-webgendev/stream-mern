@@ -1,6 +1,7 @@
 "use strict";
 
 import dotenv from "dotenv";
+import express from "express";
 import jwt from "jsonwebtoken";
 import {
   createUser,
@@ -14,9 +15,9 @@ dotenv.config();
 /**
  * Handles register action for user. It extracts `email`, `password`, and `name` from the request body, checks if the `email` is already in use, and if the `password` and `name` are valid. If all conditions are met, it creates a new user and returns a success message to the client.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const register = async (req, res) => {
   try {
@@ -55,9 +56,9 @@ export const register = async (req, res) => {
 /**
  * Handles login action for user. It extracts `email` and `password` from the request body, checks if the user exists, and if the `password` matches the stored hash. If both conditions are met, it generates a session token and returns it to the client.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const login = async (req, res) => {
   try {
@@ -109,9 +110,9 @@ export const login = async (req, res) => {
 /**
  * This function logs out the user by clearing the session token cookie.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const logout = async (req, res) => {
   try {
@@ -145,9 +146,9 @@ export const logout = async (req, res) => {
 /**
  * Checks if a user logged in or not using the session token. If the user is logged in, it returns the user object. If the user is not logged in, it returns null.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const authCheck = async (req, res) => {
   try {

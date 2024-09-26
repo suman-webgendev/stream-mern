@@ -1,6 +1,7 @@
 "use strict";
 
 import dotenv from "dotenv";
+import express from "express";
 import { getUserById, getUserByStripeCustomerId } from "../actions/users.js";
 import { logger, stripe, subscriptionMap } from "../utils/index.js";
 
@@ -9,9 +10,9 @@ dotenv.config();
 /**
  * Returns all the plans along with prices (monthly, yearly).
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const getAllStripePlans = async (_req, res) => {
   try {
@@ -42,9 +43,9 @@ export const getAllStripePlans = async (_req, res) => {
 /**
  * Create a subscription for a existing customer or create customer and create subscription.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createSubscription = async (req, res) => {
   const { priceId } = req.body;
@@ -109,9 +110,9 @@ export const createSubscription = async (req, res) => {
  * ```
  * For production, just add the `webhook url` to `https://<your_api_url>/api/subscriptions/webhook` to the stripe webhook settings.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -307,9 +308,9 @@ export const stripeWebhook = async (req, res) => {
  * This function takes `sessionId` and `currentUserId` from `req` body and checks the `stripe` checkout session.
  * If the checkout payment status is `paid`, it update the database with the `plan`, `status` and `subscriptionId`.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const verifySession = async (req, res) => {
   const { sessionId } = req.body;
@@ -356,9 +357,9 @@ export const verifySession = async (req, res) => {
 /**
  * Creates a Stripe billing portal session for the current user.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createBillingPortalSession = async (req, res) => {
   const currentUser = req.identity._id;
@@ -386,13 +387,14 @@ export const createBillingPortalSession = async (req, res) => {
   }
 };
 
-//---------------------------------------Custom Checkout Form----------------------------------
+//*---------------------------------------Custom Checkout Form----------------------------------
 
 /**
- * Description
- * @param {Request} req
- * @param {Response} res
- * @returns {Promise<Response>}
+ * Creates a PaymentIntent for a customer.
+ *
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @returns {Promise<express.Response>}
  */
 export const createPaymentIntent = async (req, res) => {
   try {

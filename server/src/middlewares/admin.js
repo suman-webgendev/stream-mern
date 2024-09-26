@@ -10,8 +10,8 @@ const { merge } = pkg;
  * This middleware takes `req`, `res` and `next` as input. It uses the cookie to check if admin is authenticated or not.
  * If admin is authenticated the it returns the admin object and calls the next function. If the user is not authenticated, it returns a 401 error and calls the next function.
  *
- * @param {Request} req - The incoming request object.
- * @param {Response} res - The outgoing response object.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
  * @param {express.NextFunction} next - The next function to call in the middleware chain.
  * @returns {express.NextFunction} - The next function to call in the middleware chain.
  */
