@@ -415,3 +415,53 @@ export const createPaymentIntent = async (req, res) => {
     });
   }
 };
+
+/**
+ * Description
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @returns {Promise<express.Response>}
+ */
+export const createCheckoutSession = async (req, res) => {
+  const { token, priceId } = req.body;
+  const currentUser = req.identity._id;
+
+  try {
+    if (!token || !priceId)
+      return res
+        .status(400)
+        .json({ message: "Please fill all the required fields" });
+
+    if (!currentUser)
+      return res.status(401).json({ message: "Please login first" });
+    const user = await getUserById(currentUser);
+
+    if (!user) return res.status(404).json({ message: "User not found!" });
+
+    if (!user.stripeCustomerId) {
+      const newCustomer = await stripe.customers.create({
+        email: user.email,
+        source: token,
+      });
+
+      user.stripeCustomerId = newCustomer.id;
+      await user.save();
+      logger.success("New stripe customer created!");
+    }
+
+    const subscription = await stripe.subscriptions.create({
+      customer: user.stripeCustomerId,
+      items: [{ price: priceId }],
+    });
+
+    return res.status(201).json({
+      success: true,
+      subscription,
+    });
+  } catch (error) {
+    logger.error("[CHECKOUT_SESSION]: ", error);
+    return res.status(500).json({
+      message: "Failed to create checkout session.",
+    });
+  }
+};

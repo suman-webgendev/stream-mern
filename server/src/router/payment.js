@@ -3,6 +3,7 @@
 import express, { Router } from "express";
 import {
   createBillingPortalSession,
+  createCheckoutSession,
   createPaymentIntent,
   createSubscription,
   getAllStripePlans,
@@ -35,7 +36,7 @@ export default (router) => {
   router.get(
     "/api/subscription/plans",
     isAuthenticated,
-    rateLimiter(),
+    rateLimiter(10, 100),
     getAllStripePlans
   );
 
@@ -62,5 +63,12 @@ export default (router) => {
     isAuthenticated,
     rateLimiter(),
     createPaymentIntent
+  );
+
+  router.post(
+    "/api/subscription/checkout",
+    isAuthenticated,
+    rateLimiter(),
+    createCheckoutSession
   );
 };
