@@ -74,7 +74,6 @@ const Navbar = () => {
                   variant="link"
                   onClick={handleSignOut}
                   className="text-lg"
-                  tabIndex={1}
                   disabled={isPending}
                 >
                   Logout

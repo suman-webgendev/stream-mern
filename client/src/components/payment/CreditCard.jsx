@@ -18,6 +18,7 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -49,24 +50,25 @@ const CreditCard = () => {
       console.error("Error creating token:", error);
       throw error;
     }
-
     return token;
+  };
+
+  const stripeElementOptions = {
+    showIcon: true,
   };
 
   const onSubmit = async (values) => {
     try {
-      console.log(form.formState);
       const token = await generateStripeToken(values);
       console.log(token);
       setError(null);
-      form.reset();
     } catch (error) {
       setError(error.message);
     }
   };
 
   return (
-    <Card className="mx-auto w-[28rem] max-w-[90vw]">
+    <Card className="mx-auto w-[28rem] max-w-[90vw] shadow-xl">
       <CardContent>
         <Form {...form}>
           <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -113,7 +115,7 @@ const CreditCard = () => {
                           }
                         }}
                         className="w-full invalid:text-red-500"
-                        placeholder="(123) 456-7890"
+                        placeholder="+1 (123) 456-7890"
                         {...field}
                       />
                     </FormControl>
@@ -163,7 +165,10 @@ const CreditCard = () => {
                   <FormItem>
                     <FormLabel>Card Number</FormLabel>
                     <FormControl>
-                      <CardNumberElement className="h-10 w-full rounded-md border border-input p-2 px-3 py-2 text-sm text-gray-700" />
+                      <CardNumberElement
+                        options={stripeElementOptions}
+                        className="h-10 w-full rounded-md border px-3 py-2"
+                      />
                     </FormControl>
                     {form.formState.errors.cardNumber && (
                       <span className="text-xs text-red-600">
@@ -182,7 +187,7 @@ const CreditCard = () => {
                   render={() => (
                     <FormItem>
                       <FormLabel>Expiration Date</FormLabel>
-                      <CardExpiryElement className="h-10 w-full rounded-md border border-input p-2 px-3 py-2 text-sm text-gray-700" />
+                      <CardExpiryElement className="h-10 w-full rounded-md border px-3 py-2" />
                     </FormItem>
                   )}
                 />
@@ -195,7 +200,7 @@ const CreditCard = () => {
                     <FormItem>
                       <FormLabel>CVV</FormLabel>
                       <FormControl>
-                        <CardCvcElement className="h-10 w-full rounded-md border border-input p-2 px-3 py-2 text-sm text-gray-700" />
+                        <CardCvcElement className="h-10 w-full rounded-md border px-3 py-2" />
                       </FormControl>
                       {form.formState.errors.cvv && (
                         <span className="text-xs text-red-600">
@@ -213,7 +218,16 @@ const CreditCard = () => {
                 </div>
               )}
               <div>
-                <Button className="w-full">Pay</Button>
+                <Button className="w-full">
+                  {form.formState.isSubmitting ? (
+                    <>
+                      <span>Processing</span>
+                      <Loader2 className="ml-2 size-5 animate-spin" />
+                    </>
+                  ) : (
+                    "Pay"
+                  )}
+                </Button>
               </div>
             </div>
           </form>
