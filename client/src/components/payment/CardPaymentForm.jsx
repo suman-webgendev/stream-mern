@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { api, formatAmount } from "@/lib/utils";
 import { cardSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import {
   CardCvcElement,
   CardExpiryElement,
@@ -20,15 +19,16 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const CardPaymentForm = () => {
   const [error, setError] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
 
   const location = useLocation();
   const { priceId, price } = location.state || {};
@@ -77,11 +77,14 @@ const CardPaymentForm = () => {
       });
       return data;
     },
-    onSuccess: () => {
-      console.log("Subscription successful");
+    onSuccess: (data) => {
+      navigate(
+        "/pricing?status=success&subscriptionId=" + data.subscription.id,
+      );
     },
     onError: (error) => {
       console.log("Error", error);
+      setError(error.message);
     },
   });
 
@@ -242,8 +245,8 @@ const CardPaymentForm = () => {
                 />
               </div>
               {error && (
-                <div className="flex items-center gap-x-2 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                  <ExclamationTriangleIcon className="size-4" />
+                <div className="flex items-center gap-x-2 rounded-md bg-destructive/15 p-3 text-center text-sm text-destructive">
+                  <AlertTriangle className="size-5" />
                   <p className="text-red-500">{error}</p>
                 </div>
               )}

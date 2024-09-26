@@ -4,11 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const verifySession = async (sessionId) => {
-  const { data } = await api.post("/api/subscription/verify-session", {
-    sessionId,
-  });
-  return data;
+const verifySession = async (sessionId = null, subscriptionId = null) => {
+  if (sessionId) {
+    const { data } = await api.post("/api/subscription/verify-session", {
+      sessionId,
+    });
+
+    return data;
+  }
+  if (subscriptionId) {
+    const { data } = await api.post("/api/subscription/verify-session", {
+      subscriptionId,
+    });
+    return data;
+  }
 };
 
 const PricingPage = () => {
@@ -18,15 +27,19 @@ const PricingPage = () => {
 
   const status = searchParams.get("status");
   const sessionId = searchParams.get("session_id");
+  const subscriptionId = searchParams.get("subscriptionId");
 
   const {
     data: verificationData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["verifySession", sessionId],
-    queryFn: () => verifySession(sessionId),
-    enabled: !!sessionId && status === "success",
+    queryKey: ["verifySession", sessionId | subscriptionId],
+    queryFn: () => verifySession(sessionId, subscriptionId),
+    enabled: !!(
+      (sessionId != null || subscriptionId != null) &&
+      status === "success"
+    ),
     retry: false,
   });
 
@@ -34,6 +47,10 @@ const PricingPage = () => {
     if (!isLoading && (verificationData || isError)) {
       navigate("/pricing", { replace: true });
     }
+
+    setTimeout(() => {
+      navigate("/pricing", { replace: true });
+    }, 100);
   }, [isLoading, verificationData, isError, navigate]);
 
   return (

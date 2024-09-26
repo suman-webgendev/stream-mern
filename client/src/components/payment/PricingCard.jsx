@@ -79,7 +79,6 @@ const PricingCard = () => {
       plan.prices.some((price) => price.id === priceId),
     );
 
-    // Extract the correct price based on the selected plan and price ID
     const priceObject = selectedPlan.prices.find(
       (price) => price.id === priceId,
     );
