@@ -23,7 +23,7 @@ const PricingCard = () => {
       const { data } = await api.get(
         "/api/subscription/get-stripe-publishable-key",
       );
-      return data;
+      return data.publishableKey;
     },
   });
 
