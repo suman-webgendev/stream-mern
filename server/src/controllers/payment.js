@@ -164,7 +164,7 @@ export const stripeWebhook = async (req, res) => {
           const previousStatus = updatedSubscription.status;
 
           if (updatedUser) {
-            console.log(
+            logger.info(
               "Subscription update event received:",
               JSON.stringify(updatedSubscription, null, 2)
             );
@@ -173,7 +173,7 @@ export const stripeWebhook = async (req, res) => {
               updatedSubscription.status === "canceled" ||
               updatedSubscription.cancel_at_period_end
             ) {
-              console.log(
+              logger.info(
                 "Cancelled subscription or scheduled for cancellation"
               );
               await updatedUser.updateSubscription(
@@ -191,7 +191,7 @@ export const stripeWebhook = async (req, res) => {
                 `Cancelled subscription for user ${updatedUser._id} (cancel_at_period_end: ${updatedSubscription.cancel_at_period_end})`
               );
             } else {
-              console.log("Updated subscription");
+              logger.success("Updated subscription");
               await updatedUser.updateSubscription(
                 await subscriptionMap(updatedSubscription.plan.amount_total),
                 updatedSubscription.status,

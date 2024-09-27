@@ -93,6 +93,8 @@ const LoginForm = () => {
                         disabled={isPending}
                         {...field}
                         type={showPassword ? "text" : "password"}
+                        name="password"
+                        autoComplete="current-password"
                         placeholder="**********"
                       />
                       <button

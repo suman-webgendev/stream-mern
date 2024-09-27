@@ -25,7 +25,11 @@ const port = Number(process.env.PORT) || 8080;
 app.use(
   cors({
     credentials: true,
-    origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
+    origin: [
+      process.env.CLIENT_URL,
+      process.env.SERVER_URL,
+      process.env.CLIENT_URL_IP,
+    ],
     methods: ["GET", "POST", "PUT", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Range"],
   })
@@ -149,7 +153,7 @@ io.on("connection", (socket) => {
 
       io.to(chatId).emit("message received", message);
     } catch (error) {
-      console.error("Error saving image message:", error);
+      logger.error("Error saving image message:", error);
     }
   });
 

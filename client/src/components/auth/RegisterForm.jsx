@@ -109,6 +109,8 @@ const RegisterForm = () => {
                         {...field}
                         type={showPassword ? "text" : "password"}
                         placeholder="**********"
+                        name="password"
+                        autoComplete="current-password"
                       />
                       <button
                         type="button"

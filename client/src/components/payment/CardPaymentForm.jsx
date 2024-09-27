@@ -54,12 +54,10 @@ const CardPaymentForm = () => {
       });
 
       if (!token || error) {
-        console.error("Error creating token:", error);
         throw error;
       }
       return token;
     } catch (err) {
-      console.error("Error generating Stripe token:", err);
       setError(err.message);
     }
   };
@@ -83,7 +81,6 @@ const CardPaymentForm = () => {
       );
     },
     onError: (error) => {
-      console.log("Error", error);
       setError(error.message);
     },
   });
@@ -91,11 +88,9 @@ const CardPaymentForm = () => {
   const onSubmit = async (values) => {
     try {
       const token = await generateStripeToken(values);
-      const response = await subscriptionMutation.mutateAsync(token);
-      console.log(response);
+      await subscriptionMutation.mutateAsync(token);
       setError(null);
     } catch (error) {
-      console.log(error);
       setError(error.response.data.message);
     }
   };

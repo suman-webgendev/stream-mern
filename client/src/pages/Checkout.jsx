@@ -1,4 +1,5 @@
 import CardPaymentFormLoading from "@/components/payment/CardPaymentFormLoading";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { motion } from "framer-motion";
@@ -19,33 +20,35 @@ const Checkout = () => {
   }, []);
 
   return (
-    <div className="flex h-[94vh] w-full items-center justify-center">
-      {stripePromise ? (
-        <Suspense fallback={<CardPaymentFormLoading />}>
+    <AuroraBackground>
+      <div className="z-10 flex size-full items-center justify-center">
+        {stripePromise ? (
+          <Suspense fallback={<CardPaymentFormLoading />}>
+            <motion.div
+              key="form"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Elements stripe={stripePromise}>
+                <CardPaymentForm />
+              </Elements>
+            </motion.div>
+          </Suspense>
+        ) : (
           <motion.div
-            key="form"
+            key="loading"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Elements stripe={stripePromise}>
-              <CardPaymentForm />
-            </Elements>
+            <CardPaymentFormLoading />
           </motion.div>
-        </Suspense>
-      ) : (
-        <motion.div
-          key="loading"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <CardPaymentFormLoading />
-        </motion.div>
-      )}
-    </div>
+        )}
+      </div>
+    </AuroraBackground>
   );
 };
 
