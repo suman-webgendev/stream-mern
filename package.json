@@ -11,10 +11,10 @@
     "client:dev": "cd client && pnpm dev",
     "client:start": "cd client && pnpm run build && pnpm start",
     "server:start": "cd server && pnpm start",
-    "install": "concurrently \"pnpm run deps:server\" \"pnpm run deps:client\"",
-    "dev": "concurrently \"pnpm run server:dev\" \"pnpm run client:dev\"",
-    "start": "concurrently \"pnpm run server:start\" \"pnpm run client:start\"",
-    "clear": "concurrently \"pnpm run server:clear\" \"pnpm run client:clear\"",
+    "install": "concurrently -p `[{name}]` -n \"SERVER,CLIENT\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm run deps:server\" \"pnpm run deps:client\"",
+    "dev": "concurrently -p `[{name}]` -n \"SERVER,CLIENT\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm run server:dev\" \"pnpm run client:dev\"",
+    "start": "concurrently -p `[{name}]` -n \"SERVER,CLIENT\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm run server:start\" \"pnpm run client:start\"",
+    "clear": "concurrently -p `[{name}]` -n \"SERVER,CLIENT\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm run server:clear\" \"pnpm run client:clear\"",
     "docker:build": "docker compose -f docker-compose.build.yml build",
     "docker:clear": "sudo docker system prune -a --volumes",
     "docker:push": "pnpm run docker:build && docker push ghcr.io/suman-webgendev/stream-mern:backend-latest && docker push ghcr.io/suman-webgendev/stream-mern:frontend-latest",
@@ -24,6 +24,6 @@
   "author": "Suman-JS",
   "license": "MIT",
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^9.0.1"
   }
 }
