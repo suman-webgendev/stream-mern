@@ -8,12 +8,24 @@ import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PricingCardLoading from "./PricingCardLoading";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISH_KEY);
-
 const PricingCard = () => {
   const [isAnnual, setIsAnnual] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const {
+    data: stripePublishableKey,
+    isLoading,
+    error: stripeError,
+  } = useQuery({
+    queryKey: ["stripe-publishable-key"],
+    queryFn: async () => {
+      const { data } = await api.get(
+        "/api/subscription/get-stripe-publishable-key",
+      );
+      return data;
+    },
+  });
 
   const {
     data: apiResponse,
@@ -26,6 +38,30 @@ const PricingCard = () => {
       return data;
     },
   });
+
+  const createSubscriptionMutation = useMutation({
+    mutationFn: async (priceId) => {
+      const { data } = await api.post("/api/subscriptions", { priceId });
+      return data;
+    },
+    onSuccess: async (data) => {
+      const stripe = await stripePromise;
+      await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    },
+  });
+
+  const createBillingPortalSessionMutation = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post("/api/subscription/billing-portal");
+      return data;
+    },
+    onSuccess: (data) => {
+      window.location.href = data.url;
+    },
+  });
+
+  if (isLoading || stripeError) return null;
+  const stripePromise = loadStripe(stripePublishableKey);
 
   const priceData = formatPriceData(apiResponse);
   const containerVariants = {
@@ -50,27 +86,6 @@ const PricingCard = () => {
       },
     },
   };
-
-  const createSubscriptionMutation = useMutation({
-    mutationFn: async (priceId) => {
-      const { data } = await api.post("/api/subscriptions", { priceId });
-      return data;
-    },
-    onSuccess: async (data) => {
-      const stripe = await stripePromise;
-      await stripe.redirectToCheckout({ sessionId: data.sessionId });
-    },
-  });
-
-  const createBillingPortalSessionMutation = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.post("/api/subscription/billing-portal");
-      return data;
-    },
-    onSuccess: (data) => {
-      window.location.href = data.url;
-    },
-  });
 
   const handlePurchase = (priceId) => {
     // createSubscriptionMutation.mutate(priceId);

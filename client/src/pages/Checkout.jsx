@@ -1,23 +1,33 @@
 import CardPaymentFormLoading from "@/components/payment/CardPaymentFormLoading";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { api } from "@/lib/utils";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 
 const Checkout = () => {
-  const [stripePromise, setStripePromise] = useState(null);
   const CardPaymentForm = lazy(
     () => import("@/components/payment/CardPaymentForm"),
   );
 
-  useEffect(() => {
-    const loadStripeClient = async () => {
-      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISH_KEY);
-      setStripePromise(stripe);
-    };
-    loadStripeClient();
-  }, []);
+  const {
+    data: stripePublishableKey,
+    isLoading,
+    error: stripeError,
+  } = useQuery({
+    queryKey: ["stripe-publishable-key"],
+    queryFn: async () => {
+      const { data } = await api.get(
+        "/api/subscription/get-stripe-publishable-key",
+      );
+      return data;
+    },
+  });
+
+  if (isLoading || stripeError) return null;
+  const stripePromise = loadStripe(stripePublishableKey);
 
   return (
     <AuroraBackground>

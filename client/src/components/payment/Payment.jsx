@@ -7,7 +7,20 @@ import CheckoutForm from "./CheckoutForm";
 
 const Payment = () => {
   const [clientSecret, setClientSecret] = useState("");
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISH_KEY);
+
+  const {
+    data: stripePublishableKey,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["stripe-publishable-key"],
+    queryFn: async () => {
+      const { data } = await api.get(
+        "/api/subscription/get-stripe-publishable-key",
+      );
+      return data;
+    },
+  });
 
   useQuery({
     queryKey: ["payment-intent"],
@@ -17,6 +30,9 @@ const Payment = () => {
       return data;
     },
   });
+
+  if (isLoading || error) return null;
+  const stripePromise = loadStripe(stripePublishableKey);
 
   return (
     <>
