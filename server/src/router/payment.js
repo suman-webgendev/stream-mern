@@ -7,6 +7,7 @@ import {
   createPaymentIntent,
   createSubscription,
   getAllStripePlans,
+  getStripePublishableKey,
   stripeWebhook,
   verifySession,
 } from "../controllers/payment.js";
@@ -54,6 +55,14 @@ export default (router) => {
     isAuthenticated,
     rateLimiter(),
     createBillingPortalSession
+  );
+
+  //? Get stripe publishable key
+  router.get(
+    "/api/subscription/get-stripe-publishable-key",
+    isAuthenticated,
+    rateLimiter(10, 100),
+    getStripePublishableKey
   );
 
   //*---------------------------------Custom Checkout Form------------------------------------

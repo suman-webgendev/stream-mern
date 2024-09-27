@@ -513,3 +513,22 @@ export const createCheckoutSession = async (req, res) => {
     });
   }
 };
+
+/**
+ * This function returns the stripe publishable key to the client.
+ *
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
+ */
+export const getStripePublishableKey = async (req, res) => {
+  try {
+    const publishableKey = process.env.STRIPE_PUBLISH_KEY;
+    return res.status(200).json({ publishableKey });
+  } catch (error) {
+    logger.error("[STRIPE_PUBLISHABLE_KEY]: ", error);
+    return res.status(500).json({
+      message: "Failed to get stripe publishable key.",
+    });
+  }
+};
