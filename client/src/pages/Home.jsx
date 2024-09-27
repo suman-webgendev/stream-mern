@@ -37,7 +37,7 @@ const Home = () => {
       }}
       transition={{ duration: 0.5 }}
     >
-      <ScrollArea className="h-[94vh] rounded-md border pb-6">
+      <ScrollArea className="h-[95vh] rounded-md border pb-6">
         <Suspense fallback={<Loading />}>
           <VideoList videos={videos} />
         </Suspense>
