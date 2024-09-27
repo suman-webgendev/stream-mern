@@ -13,11 +13,7 @@ const PricingCard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const {
-    data: stripePublishableKey,
-    isLoading,
-    error: stripeError,
-  } = useQuery({
+  const { data: stripePublishableKey } = useQuery({
     queryKey: ["stripe-publishable-key"],
     queryFn: async () => {
       const { data } = await api.get(
@@ -45,7 +41,7 @@ const PricingCard = () => {
       return data;
     },
     onSuccess: async (data) => {
-      const stripe = await stripePromise;
+      const stripe = await loadStripe(stripePublishableKey);
       await stripe.redirectToCheckout({ sessionId: data.sessionId });
     },
   });
@@ -59,9 +55,6 @@ const PricingCard = () => {
       window.location.href = data.url;
     },
   });
-
-  if (isLoading || stripeError) return null;
-  const stripePromise = loadStripe(stripePublishableKey);
 
   const priceData = formatPriceData(apiResponse);
   const containerVariants = {

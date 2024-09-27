@@ -12,11 +12,7 @@ const Checkout = () => {
     () => import("@/components/payment/CardPaymentForm"),
   );
 
-  const {
-    data: stripePublishableKey,
-    isLoading,
-    error: stripeError,
-  } = useQuery({
+  const { data: stripePublishableKey } = useQuery({
     queryKey: ["stripe-publishable-key"],
     queryFn: async () => {
       const { data } = await api.get(
@@ -26,13 +22,10 @@ const Checkout = () => {
     },
   });
 
-  if (isLoading || stripeError) return null;
-  const stripePromise = loadStripe(stripePublishableKey);
-
   return (
     <AuroraBackground>
       <div className="z-10 flex size-full items-center justify-center">
-        {stripePromise ? (
+        {loadStripe(stripePublishableKey) ? (
           <Suspense fallback={<CardPaymentFormLoading />}>
             <motion.div
               key="form"
@@ -41,7 +34,7 @@ const Checkout = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Elements stripe={stripePromise}>
+              <Elements stripe={loadStripe(stripePublishableKey)}>
                 <CardPaymentForm />
               </Elements>
             </motion.div>
