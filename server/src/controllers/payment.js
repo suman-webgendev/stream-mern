@@ -355,8 +355,6 @@ export const verifySession = async (req, res) => {
     }
     if (subscriptionId) {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
-      console.log(subscription);
       const plan = await subscriptionMap(subscription.plan.amount);
       const subscriptionEndDate = new Date(
         subscription.current_period_end * 1000
