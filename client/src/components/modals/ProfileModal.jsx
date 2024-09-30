@@ -1,54 +1,39 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Avatar,
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ProfileModal = ({ user, children }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <>
-      <span onClick={onOpen}>{children}</span>
-      <Modal size="lg" isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader fontSize={40} display="flex" justifyContent="center">
-            {user.name}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody
-            display="flex"
-            flexDir="column"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Avatar
-              size="2xl"
-              cursor="pointer"
-              name={user?.name}
-              alignItems="center"
-            />
-            <Text fontSize={{ base: "28px", md: "30px" }} mt={2}>
-              <strong>Email:</strong> {user.email}
-            </Text>
-          </ModalBody>
+    <Dialog>
+      <DialogTrigger>
+        <span>{children}</span>
+      </DialogTrigger>
 
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex justify-center text-4xl">
+            {user.name}
+          </DialogTitle>
+        </DialogHeader>
+        <DialogClose />
+        <div className="flex flex-col items-center justify-center">
+          <Avatar className="size-28">
+            <AvatarImage src="/user.jpg" alt="user" />
+            <AvatarFallback>{user.name.slice(0, 1)}</AvatarFallback>
+          </Avatar>
+
+          <p className="mt-2 text-2xl md:text-3xl">
+            <strong>Email:</strong> {user.email}
+          </p>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

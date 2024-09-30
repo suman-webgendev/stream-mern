@@ -1,35 +1,30 @@
 import UserBadgeItem from "@/components/chat/UserBadgeItem";
 import UserListItem from "@/components/chat/UserListItem";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/utils";
-import {
-  Box,
-  Button,
-  FormControl,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
+import { FormControl } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const GroupChatModal = ({ children }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  const toast = useToast();
   const { chats, setChats } = useChat();
 
   const { mutateAsync: createGroup } = useMutation({
@@ -42,39 +37,35 @@ const GroupChatModal = ({ children }) => {
     },
     onSuccess: (data) => {
       setChats([data, ...chats]);
-      onClose();
-      toast({
-        title: "New Group Created",
-        status: "success",
+      toast.success("New Group Created", {
+        description: "Group created successfully!",
         duration: 3000,
-        isClosable: true,
+        position: "bottom-right",
+        dismissible: true,
       });
     },
     onError: (error) => {
-      toast({
-        title: "Failed to create group",
-        description: error.response.data,
-        status: "error",
+      toast.error("Failed to create group", {
+        description: error.response.data.message,
         duration: 3000,
-        isClosable: true,
+        position: "bottom-right",
+        dismissible: true,
       });
     },
   });
 
   const handleSubmit = useCallback(() => {
     if (!groupChatName || !selectedUsers) {
-      toast({
-        title: "Please fill all the fields",
-        status: "warning",
+      toast.warning("Please fill all the fields", {
         duration: 3000,
-        isClosable: true,
-        position: "top",
+        position: "bottom-right",
+        dismissible: true,
       });
       return;
     }
 
     createGroup();
-  }, [createGroup, groupChatName, selectedUsers, toast]);
+  }, [createGroup, groupChatName, selectedUsers]);
 
   const handleDelete = useCallback(
     (user) => {
@@ -86,18 +77,17 @@ const GroupChatModal = ({ children }) => {
   const handleGroup = useCallback(
     (userToAdd) => {
       if (selectedUsers.includes(userToAdd)) {
-        toast({
-          title: "User already exist",
-          status: "warning",
+        toast.warning("User already exist", {
+          description: "User already exist in the group",
           duration: 3000,
-          isClosable: true,
-          position: "top",
+          position: "bottom-right",
+          dismissible: true,
         });
         return;
       }
       setSelectedUsers([...selectedUsers, userToAdd]);
     },
-    [selectedUsers, toast],
+    [selectedUsers],
   );
 
   const debouncedInput = useDebounce(searchQuery, 300);
@@ -113,12 +103,11 @@ const GroupChatModal = ({ children }) => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Error fetching the chat.",
+      toast.error("Error fetching the chat.", {
         description: error.message,
-        status: "error",
         duration: 3000,
-        isClosable: true,
+        position: "bottom-left",
+        dismissible: true,
       });
     },
   });
@@ -136,66 +125,67 @@ const GroupChatModal = ({ children }) => {
   }, []);
 
   return (
-    <>
-      <span onClick={onOpen}>{children}</span>
+    <Dialog>
+      <DialogTrigger asChild>
+        <span>{children}</span>
+      </DialogTrigger>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader fontSize="35px" display="flex" justifyContent="center">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex justify-center text-4xl">
             Create Group Chat
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody display="flex" flexDir="column" alignItems="center">
-            <FormControl>
-              <Input
-                type="text"
-                placeholder="Group Name"
-                mb={3}
-                onChange={(e) => setGroupChatName(e.target.value)}
-              />
-            </FormControl>
-            <FormControl>
-              <Input
-                type="text"
-                placeholder="Add users, eg: John, Jane"
-                mb={1}
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </FormControl>
-            <Box w="100%" display="flex" flexWrap="wrap">
-              {selectedUsers.map((u) => (
-                <UserBadgeItem
-                  key={u._id}
-                  user={u}
-                  handleClick={() => handleDelete(u)}
-                />
-              ))}
-            </Box>
-            {isPending ? (
-              <Spinner size="lg" />
-            ) : (
-              searchResults.length > 0 &&
-              searchResults
-                ?.slice(0, 4)
-                .map((user) => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleClick={() => handleGroup(user)}
-                  />
-                ))
-            )}
-          </ModalBody>
+          </DialogTitle>
+        </DialogHeader>
 
-          <ModalFooter>
-            <Button colorScheme="blue" onClick={handleSubmit}>
-              Create Group
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+        <div className="flex flex-col items-center">
+          <FormControl>
+            <Input
+              type="text"
+              placeholder="Group Name"
+              className="mb-3"
+              onChange={(e) => setGroupChatName(e.target.value)}
+            />
+          </FormControl>
+
+          <FormControl>
+            <Input
+              type="text"
+              placeholder="Add users, eg: John, Jane"
+              className="mb-3"
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </FormControl>
+
+          <div className="flex w-full flex-wrap">
+            {selectedUsers.map((u) => (
+              <UserBadgeItem
+                key={u._id}
+                user={u}
+                handleClick={() => handleDelete(u)}
+              />
+            ))}
+          </div>
+          {isPending ? (
+            <Loader2 className="size-6 animate-spin" />
+          ) : (
+            searchResults.length > 0 &&
+            searchResults
+              ?.slice(0, 4)
+              .map((user) => (
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  handleClick={() => handleGroup(user)}
+                />
+              ))
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSubmit}>Create Group</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

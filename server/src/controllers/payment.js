@@ -90,6 +90,7 @@ export const createSubscription = async (req, res) => {
 
 /**
  * This function creates webhook for stripe payment. It retrieves the `stripe signature` and then uses it to verify the `webhook request`. If the request is valid, it processes the event and updates the database accordingly. It checks the event type and handles each case accordingly. It handles the following events:
+ *
  * - `checkout.session.completed`: When a new subscription is created.
  * - `customer.subscription.updated`: When a subscription is updated.
  * - `customer.subscription.deleted`: When a subscription is canceled.

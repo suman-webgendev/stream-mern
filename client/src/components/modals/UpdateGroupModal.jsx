@@ -5,7 +5,6 @@ import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/utils";
 import {
-  Box,
   Button,
   FormControl,
   IconButton,
@@ -19,11 +18,11 @@ import {
   ModalOverlay,
   Spinner,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const UpdateGroupModal = () => {
   const [groupChatName, setGroupChatName] = useState("");
@@ -34,7 +33,6 @@ const UpdateGroupModal = () => {
   const { selectedChat, setSelectedChat } = useChat();
 
   const { user: currentUser } = useAuth();
-  const toast = useToast();
 
   const debouncedInput = useDebounce(searchQuery, 300);
 
@@ -176,7 +174,7 @@ const UpdateGroupModal = () => {
       }
       addUser(userToAdd);
     },
-    [selectedChat, toast, currentUser, addUser],
+    [selectedChat, currentUser, addUser],
   );
 
   const handleRemove = useCallback(
@@ -193,7 +191,7 @@ const UpdateGroupModal = () => {
       }
       removeUser(userToRemove);
     },
-    [currentUser, toast, selectedChat, removeUser],
+    [currentUser, selectedChat, removeUser],
   );
 
   const handleRename = useCallback(() => {
@@ -209,7 +207,7 @@ const UpdateGroupModal = () => {
       return;
     }
     rename();
-  }, [rename, groupChatName, currentUser, selectedChat, toast]);
+  }, [rename, groupChatName, currentUser, selectedChat]);
 
   return (
     <>
@@ -227,7 +225,7 @@ const UpdateGroupModal = () => {
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Box w="100%" display="flex" flexWrap="wrap" pb={3}>
+            <div className="flex w-full flex-wrap pb-3">
               {selectedChat.users.map((user) => (
                 <UserBadgeItem
                   key={user._id}
@@ -235,7 +233,7 @@ const UpdateGroupModal = () => {
                   handleClick={() => handleRemove(user)}
                 />
               ))}
-            </Box>
+            </div>
             <FormControl display="flex">
               <Input
                 placeholder="Group Name"
