@@ -8,10 +8,10 @@ import {
   getAdminByEmail,
   getAdminBySessionToken,
   getAdmins,
-} from "@/actions/admin";
-import { getUsers } from "@/actions/users";
-import { getVideos } from "@/actions/videos";
-import { authentication, logger, readImageFile } from "@/utils";
+} from "../actions/admin.js";
+import { getUsers } from "../actions/users.js";
+import { getVideos } from "../actions/videos.js";
+import { authentication, logger, readImageFile } from "../utils/index.js";
 
 dotenv.config();
 

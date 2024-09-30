@@ -10,9 +10,9 @@ import path from "path";
 import { Server } from "socket.io";
 import { fileURLToPath } from "url";
 
-import { db } from "@/db";
-import router from "@/router";
-import { logger } from "@/utils";
+import { db } from "./db/index.js";
+import router from "./router/index.js";
+import { logger } from "./utils/index.js";
 
 dotenv.config();
 

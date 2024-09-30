@@ -8,8 +8,8 @@ import {
   createUser,
   getUserByEmail,
   getUserBySessionToken,
-} from "@/actions/users";
-import { authentication, logger, random } from "@/utils";
+} from "../actions/users.js";
+import { authentication, logger, random } from "../utils/index.js";
 
 dotenv.config();
 

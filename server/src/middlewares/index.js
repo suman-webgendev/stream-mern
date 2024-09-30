@@ -4,8 +4,8 @@ import express from "express";
 import pkg from "lodash";
 const { merge } = pkg;
 
-import { getUserBySessionToken } from "@/actions/users";
-import { logger } from "@/utils";
+import { getUserBySessionToken } from "../actions/users.js";
+import { logger } from "../utils/index.js";
 
 /**
  * This middleware takes `req`, `res` and `next` as input. It uses the cookie to check if user is authenticated or not.

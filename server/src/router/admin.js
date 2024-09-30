@@ -1,5 +1,7 @@
 "use strict";
 
+import { Router } from "express";
+
 import {
   adminLogout,
   dashboard,
@@ -10,9 +12,8 @@ import {
   users,
   videos,
 } from "@/controllers/admin";
-import { isAuthenticatedAdmin } from "@/middlewares/admin";
-import { rateLimiter } from "@/utils";
-import { Router } from "express";
+import { isAuthenticatedAdmin } from "../middlewares/admin.js";
+import { rateLimiter } from "../utils/index.js";
 
 /**
  * @param {Router} router

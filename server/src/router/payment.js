@@ -1,5 +1,7 @@
 "use strict";
 
+import express, { Router } from "express";
+
 import {
   createBillingPortalSession,
   createCheckoutSession,
@@ -9,10 +11,9 @@ import {
   getStripePublishableKey,
   stripeWebhook,
   verifySession,
-} from "@/controllers/payment";
-import { isAuthenticated } from "@/middlewares";
-import { rateLimiter } from "@/utils";
-import express, { Router } from "express";
+} from "../controllers/payment.js";
+import { isAuthenticated } from "../middlewares/index.js";
+import { rateLimiter } from "../utils/index.js";
 
 /**
  * @param {Router} router
@@ -67,6 +68,7 @@ export default (router) => {
 
   //*---------------------------------Custom Checkout Form------------------------------------
 
+  //? Create payment intent
   router.post(
     "/api/subscription/create-payment-intent",
     isAuthenticated,
@@ -74,6 +76,7 @@ export default (router) => {
     createPaymentIntent
   );
 
+  //? Create checkout session
   router.post(
     "/api/subscription/checkout",
     isAuthenticated,

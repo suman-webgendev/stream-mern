@@ -1,6 +1,6 @@
 "use strict";
 
-import { db } from "@/db";
+import { db } from "../db/index.js";
 
 export const getAdmins = () => db.Admin.find().sort([["createdAt", -1]]);
 

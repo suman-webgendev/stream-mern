@@ -3,8 +3,8 @@
 import dotenv from "dotenv";
 import express from "express";
 
-import { getUserById, getUserByStripeCustomerId } from "@/actions/users";
-import { logger, stripe, subscriptionMap } from "@/utils";
+import { getUserById, getUserByStripeCustomerId } from "../actions/users.js";
+import { logger, stripe, subscriptionMap } from "../utils/index.js";
 
 dotenv.config();
 

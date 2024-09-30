@@ -1,5 +1,7 @@
 "use strict";
 
+import { Router } from "express";
+
 import {
   accessChats,
   addToGroup,
@@ -8,10 +10,9 @@ import {
   removeFromGroup,
   renameGroup,
   searchUser,
-} from "@/controllers/chat";
-import { isAuthenticated } from "@/middlewares";
-import { rateLimiter } from "@/utils";
-import { Router } from "express";
+} from "../controllers/chat.js";
+import { isAuthenticated } from "../middlewares/index.js";
+import { rateLimiter } from "../utils/index.js";
 
 /**
  * @param {Router} router

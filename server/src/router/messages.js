@@ -1,8 +1,9 @@
 "use strict";
 
-import { allMessages, sendMessage } from "@/controllers/messages";
-import { isAuthenticated } from "@/middlewares";
 import { Router } from "express";
+
+import { allMessages, sendMessage } from "../controllers/messages.js";
+import { isAuthenticated } from "../middlewares/index.js";
 
 /**
  * @param {Router} router

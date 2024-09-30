@@ -12,9 +12,6 @@ RUN npm install -g pnpm && pnpm install --frozen-lockfile
 # Copy all project files
 COPY . .
 
-# Run the build process
-RUN pnpm run build
-
 # Stage 2: Production image
 FROM node:20-alpine
 

@@ -2,8 +2,8 @@
 
 import express from "express";
 
-import { getUsers } from "@/actions/users";
-import { logger } from "@/utils";
+import { getUsers } from "../actions/users.js";
+import { logger } from "../utils/index.js";
 
 /**
  * This function returns a list of all users in the database.
