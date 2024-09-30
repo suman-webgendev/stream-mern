@@ -1,24 +1,14 @@
-import { CloseIcon } from "@chakra-ui/icons";
-import { Box } from "@chakra-ui/react";
+import { X } from "lucide-react";
 
 const UserBadgeItem = ({ user, handleClick }) => {
   return (
-    <Box
-      px={2}
-      py={1}
-      borderRadius="lg"
-      m={1}
-      mb={2}
-      variant="solid"
-      fontSize={14}
-      backgroundColor="purple"
-      color="white"
-      cursor="pointer"
+    <div
+      className="m-1 mb-2 flex cursor-pointer rounded-lg bg-purple-500 px-2 py-1 text-base text-white"
       onClick={handleClick}
     >
       {user.name}
-      <CloseIcon pl={1} />
-    </Box>
+      <X className="pl-1" />
+    </div>
   );
 };
 

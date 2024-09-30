@@ -32,3 +32,7 @@ export const cardSchema = z.object({
     )
     .min(10, "Phone number must be at least 10 digits long"),
 });
+
+export const messageSchema = z.object({
+  content: z.string().min(1, { message: "Message is required" }),
+});

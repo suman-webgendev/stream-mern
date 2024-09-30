@@ -1,23 +1,19 @@
 import { useChat } from "@/hooks/useChat";
-import { Box } from "@chakra-ui/react";
+import { cn } from "@/lib/utils";
 import SingleChat from "./SingleChat";
 
 const ChatBox = () => {
   const { selectedChat } = useChat();
 
   return (
-    <Box
-      display={{ base: selectedChat ? "flex" : "none", md: "flex" }}
-      alignItems="center"
-      flexDir="column"
-      p={3}
-      bg="white"
-      w={{ base: "100%", md: "74.5%" }}
-      borderRadius="lg"
-      borderWidth="1px"
+    <div
+      className={cn(
+        "hidden w-full flex-col items-center rounded-lg border bg-white p-1 md:flex md:w-[74.5%]",
+        selectedChat && "flex",
+      )}
     >
       <SingleChat />
-    </Box>
+    </div>
   );
 };
 

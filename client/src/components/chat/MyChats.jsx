@@ -1,16 +1,18 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+
 import GroupChatModal from "@/components/modals/GroupChatModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
-import { api, getSender } from "@/lib/utils";
-import { AddIcon } from "@chakra-ui/icons";
-import { Avatar, Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { api, cn, getSender } from "@/lib/utils";
 import ChatLoading from "./ChatLoading";
 
 const MyChats = () => {
   const { selectedChat, setSelectedChat, chats, setChats } = useChat();
   const { user } = useAuth();
-  const toast = useToast();
 
   const { error } = useQuery({
     queryKey: ["AllChats"],
@@ -22,79 +24,57 @@ const MyChats = () => {
   });
 
   if (error) {
-    toast({
-      title: "Error occurred!",
+    toast.error("Error occurred!", {
       description: "Failed to fetch chats!",
-      status: "error",
       duration: 3000,
-      isClosable: true,
       position: "bottom-left",
+      dismissible: true,
     });
   }
   return (
-    <Box
-      display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
-      flexDir="column"
-      alignItems="center"
-      p={3}
-      bg="white"
-      borderRadius="lg"
-      borderWidth="1px"
-      w={{ base: "100%", md: "25%" }}
+    <div
+      className={cn(
+        "flex w-full flex-col items-center rounded-lg border bg-white p-1 md:flex md:w-1/4",
+        selectedChat && "hidden",
+      )}
     >
-      <Box
-        px={3}
-        pb={3}
-        fontSize={{ base: "24px", md: "24px" }}
-        display="flex"
-        flexDir={{ base: "row", md: "column", lg: "column", xl: "row" }}
-        w="100%"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <div className="flex w-full flex-row items-center justify-between p-1 text-2xl md:flex-col md:text-2xl lg:flex-col xl:flex-row">
         My Chats
         <GroupChatModal>
-          <Button
-            display="flex"
-            fontSize={{ base: "17px", md: "10px", lg: "17px" }}
-            rightIcon={<AddIcon />}
-          >
+          <Button className="flex items-center gap-1">
+            <span>
+              <Plus className="size-5 font-semibold" />
+            </span>
             New Group Chat
           </Button>
         </GroupChatModal>
-      </Box>
-      <Box
-        display="flex"
-        flexDir="column"
-        p={3}
-        bg="#F8F8F8"
-        w="100%"
-        h="100%"
-        borderRadius="lg"
-        overflowY="hidden"
-      >
+      </div>
+      <div className="flex size-full flex-col overflow-hidden rounded-lg bg-[#f8f8f8] p-1">
         {Array.isArray(chats) && chats.length > 0 ? (
-          <Stack overflowY="scroll">
+          <div className="overflow-y-scroll">
             {chats?.map((chat) => (
-              <Box
+              <div
                 key={chat._id}
                 onClick={() => setSelectedChat(chat)}
-                cursor="pointer"
-                bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
-                color={selectedChat === chat ? "white" : "black"}
-                px={3}
-                py={2}
-                borderRadius="lg"
+                className={cn(
+                  "cursor-pointer rounded-lg bg-[#e8e8e8] px-3 py-2 text-black",
+                  selectedChat === chat && "bg-[#38B2AC] text-white",
+                )}
               >
-                <Text ml={2} fontWeight={800} p={2}>
+                <p className="ml-0.5 p-0.5 font-extrabold">
                   {!chat.isGroupChat
                     ? getSender(user, chat.users)
                     : chat.chatName}
-                </Text>
+                </p>
                 {chat?.lastMessage && (
                   <div className="flex items-center space-x-2">
-                    <Avatar name={chat.lastMessage.sender?.name} size="sm" />
-                    <Text>
+                    <Avatar>
+                      <AvatarImage src="/user.jpg" alt="user" />
+                      <AvatarFallback className="text-black">
+                        {chat.lastMessage.sender?.name.slice(0, 1)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p>
                       <span>
                         {chat.lastMessage.sender?.name === user.name
                           ? "Me"
@@ -105,17 +85,17 @@ const MyChats = () => {
                         ? "Photo"
                         : chat?.lastMessage?.content.slice(0, 6) +
                           (chat?.lastMessage?.content.length > 6 ? "..." : "")}
-                    </Text>
+                    </p>
                   </div>
                 )}
-              </Box>
+              </div>
             ))}
-          </Stack>
+          </div>
         ) : (
           <ChatLoading />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

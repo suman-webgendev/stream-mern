@@ -1,42 +1,39 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useMutation } from "@tanstack/react-query";
+import { Bell, Loader, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import ChatLoading from "@/components/chat/ChatLoading";
+import NotificationBadge from "@/components/chat/NotificationBadge";
+import UserListItem from "@/components/chat/UserListItem";
 import ProfileModal from "@/components/modals/ProfileModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api, getSender } from "@/lib/utils";
-import { BellIcon } from "@chakra-ui/icons";
+
 import {
-  Avatar,
-  Box,
-  Button,
   Drawer,
   DrawerBody,
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  Input,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Spinner,
-  Text,
-  Tooltip,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
-import { useMutation } from "@tanstack/react-query";
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import ChatLoading from "./ChatLoading";
-import NotificationBadge from "./NotificationBadge";
-import UserListItem from "./UserListItem";
 
 const SideDrawer = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [search, setSearch] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { user } = useAuth();
-  const toast = useToast();
+
   const { chats, setChats, setSelectedChat, notifications, setNotifications } =
     useChat();
   const debouncedSearch = useDebounce(search);
@@ -66,7 +63,6 @@ const SideDrawer = () => {
   const { mutateAsync: accessChat, isPending: loadingChats } = useMutation({
     mutationFn: async (userId) => {
       const { data } = await api.post("/api/chat", { userId });
-
       return data;
     },
     onSuccess: (data) => {
@@ -75,12 +71,10 @@ const SideDrawer = () => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Error fetching the chat.",
+      toast.error("Error fetching the chat.", {
         description: error.message,
-        status: "error",
         duration: 3000,
-        isClosable: true,
+        dismissible: true,
       });
     },
     onSettled: () => {
@@ -95,12 +89,10 @@ const SideDrawer = () => {
   } = useMutation({
     mutationFn: async () => {
       if (!search.trim()) {
-        toast({
-          title: "Search failed",
+        toast.error("Search failed", {
           description: "Please enter something to search",
-          status: "error",
+          dismissible: true,
           duration: 3000,
-          isClosable: true,
         });
       }
       const { data } = await api.get(
@@ -113,51 +105,28 @@ const SideDrawer = () => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Search failed",
+      toast.error("Search failed", {
         description: error.message,
-        status: "error",
+        dismissible: true,
         duration: 3000,
-        isClosable: true,
       });
     },
   });
 
-  const handleSearch = () => {
-    searchUsers();
-  };
-
   return (
     <>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        bg="white"
-        w="100%"
-        p="5px 10px 5px 10px"
-        borderWidth="5px"
-      >
-        <Tooltip
-          label="Search users to start a chat"
-          hasArrow
-          placement="bottom-end"
-        >
-          <Button variant="ghost" onClick={onOpen}>
-            <Search />
-            <Text display={{ base: "none", md: "flex" }} px="4">
-              Search User
-            </Text>
-          </Button>
-        </Tooltip>
-        <Text fontSize="2xl" fontWeight="bold">
-          Let&apos;s Chat
-        </Text>
+      <div className="flex w-full items-center justify-between border-[5px] bg-white px-2.5 py-1.5">
+        <Button variant="ghost" onClick={onOpen} className="font-bold">
+          <Search />
+          <p className="hidden px-4 md:flex">Search User</p>
+        </Button>
+
+        <p className="text-2xl font-bold">Let&apos;s Chat</p>
         <div className="flex items-center">
           <Menu>
             <MenuButton p={1}>
               <NotificationBadge count={notifications?.length}>
-                <BellIcon fontSize="2xl" m={1} />
+                <Bell className="m-1 text-xl" />
               </NotificationBadge>
             </MenuButton>
             <MenuList p={2}>
@@ -182,31 +151,31 @@ const SideDrawer = () => {
           </Menu>
 
           <ProfileModal user={user}>
-            <Avatar
-              size="sm"
-              cursor="pointer"
-              name={user?.name}
-              alignItems="center"
-            />
+            <Avatar className="size-8 cursor-pointer items-center bg-green-300">
+              <AvatarImage src="/user.jpg" alt="user" />
+              <AvatarFallback className="text-black">
+                {user?.name.slice(0, 1)}
+              </AvatarFallback>
+            </Avatar>
           </ProfileModal>
         </div>
-      </Box>
+      </div>
       <Drawer placement="left" onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
         <DrawerContent>
           <DrawerHeader borderBottomWidth="1px">Search Users</DrawerHeader>
           <DrawerBody>
-            <Box display="flex" pb={2}>
+            <div className="flex pb-2">
               <Input
                 placeholder="Search by name or email"
-                mr={2}
+                className="mr-2"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <Button onClick={handleSearch} isLoading={isPending}>
+              <Button onClick={() => searchUsers()} isLoading={isPending}>
                 Go
               </Button>
-            </Box>
+            </div>
             {!isSuccess && isPending && <ChatLoading />}
             {!isPending &&
               isSuccess &&
@@ -217,7 +186,7 @@ const SideDrawer = () => {
                   handleClick={() => accessChat(user._id)}
                 />
               ))}
-            {loadingChats && <Spinner ml="auto" display="flex" />}
+            {loadingChats && <Loader className="ml-auto flex animate-spin" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
