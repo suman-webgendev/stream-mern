@@ -11,7 +11,7 @@ import {
   renderLoginPage,
   users,
   videos,
-} from "@/controllers/admin";
+} from "../controllers/admin.js";
 import { isAuthenticatedAdmin } from "../middlewares/admin.js";
 import { rateLimiter } from "../utils/index.js";
 
