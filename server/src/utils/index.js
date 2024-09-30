@@ -11,10 +11,10 @@ import sharp from "sharp";
 import Stripe from "stripe";
 import { fileURLToPath } from "url";
 
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-dotenv.config();
 
 export const random = () => crypto.randomBytes(128).toString("base64");
 

@@ -1,8 +1,8 @@
-import { getAllUsers } from "../controllers/users.js";
-import { isAuthenticated } from "../middlewares/index.js";
-
 import { Router } from "express";
-import { rateLimiter } from "../utils/index.js";
+
+import { getAllUsers } from "@/controllers/users";
+import { isAuthenticated } from "@/middlewares";
+import { rateLimiter } from "@/utils";
 
 /**
  * @param {Router} router

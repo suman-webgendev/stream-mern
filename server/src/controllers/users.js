@@ -1,8 +1,9 @@
 "use strict";
 
 import express from "express";
-import { getUsers } from "../actions/users.js";
-import { logger } from "../utils/index.js";
+
+import { getUsers } from "@/actions/users";
+import { logger } from "@/utils";
 
 /**
  * This function returns a list of all users in the database.

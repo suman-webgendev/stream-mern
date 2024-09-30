@@ -1,6 +1,6 @@
 "use strict";
 
-import { db } from "../db/index.js";
+import { db } from "@/db";
 
 export const getVideos = () =>
   db.Video.find()

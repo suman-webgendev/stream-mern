@@ -1,6 +1,5 @@
 "use strict";
 
-import express, { Router } from "express";
 import {
   createBillingPortalSession,
   createCheckoutSession,
@@ -10,9 +9,10 @@ import {
   getStripePublishableKey,
   stripeWebhook,
   verifySession,
-} from "../controllers/payment.js";
-import { isAuthenticated } from "../middlewares/index.js";
-import { rateLimiter } from "../utils/index.js";
+} from "@/controllers/payment";
+import { isAuthenticated } from "@/middlewares";
+import { rateLimiter } from "@/utils";
+import express, { Router } from "express";
 
 /**
  * @param {Router} router

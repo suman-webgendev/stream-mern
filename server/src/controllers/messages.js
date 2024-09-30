@@ -1,8 +1,9 @@
 "use strict";
 
 import express from "express";
-import { db } from "../db/index.js";
-import { logger } from "../utils/index.js";
+
+import { db } from "@/db";
+import { logger } from "@/utils";
 
 /**
  * This function takes `req` and `res` as input. It extracts `currentUserId` from `req.identity` and also extracts `messageContent`, `chatId` and `chatType` from `req` body.

@@ -1,14 +1,14 @@
 "use strict";
 
-import { Router } from "express";
 import {
   authCheck,
   login,
   logout,
   register,
-} from "../controllers/authentication.js";
-import { isAuthenticated } from "../middlewares/index.js";
-import { rateLimiter } from "../utils/index.js";
+} from "@/controllers/authentication";
+import { isAuthenticated } from "@/middlewares";
+import { rateLimiter } from "@/utils";
+import { Router } from "express";
 
 /**
  * @param {Router} router

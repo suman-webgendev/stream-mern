@@ -4,14 +4,15 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import http from "http";
+import { createServer } from "http";
 import mongoose from "mongoose";
 import path from "path";
 import { Server } from "socket.io";
 import { fileURLToPath } from "url";
-import { db } from "./db/index.js";
-import router from "./router/index.js";
-import { logger } from "./utils/index.js";
+
+import { db } from "@/db";
+import router from "@/router";
+import { logger } from "@/utils";
 
 dotenv.config();
 
@@ -63,7 +64,7 @@ app.set("views", path.join(__dirname, "views"));
 // Static files
 app.use(express.static("public"));
 
-const server = http.createServer(app);
+const server = createServer(app);
 
 // MongoDB connection
 mongoose.Promise = Promise;

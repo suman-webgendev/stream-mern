@@ -5,13 +5,9 @@ import fs from "fs";
 import mongoose from "mongoose";
 import multer from "multer";
 import { promisify } from "util";
-import { createVideo, getVideoById, getVideos } from "../actions/videos.js";
-import {
-  generateThumbnail,
-  logger,
-  readImageFile,
-  storage,
-} from "../utils/index.js";
+
+import { createVideo, getVideoById, getVideos } from "@/actions/videos";
+import { generateThumbnail, logger, readImageFile, storage } from "@/utils";
 
 const upload = multer({
   storage: storage,

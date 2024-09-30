@@ -1,6 +1,7 @@
 import express from "express";
-import { db } from "../db/index.js";
-import { logger } from "../utils/index.js";
+
+import { db } from "@/db";
+import { logger } from "@/utils";
 
 /**
  * This function fetches the chat between two users if it doesn't exist, and creates one if it does. It extracts `userId` from the request `body`, checks if the user exists, and if the user is not the group admin. If all conditions are met, it returns the chat between the two users.

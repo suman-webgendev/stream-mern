@@ -2,8 +2,9 @@
 
 import dotenv from "dotenv";
 import express from "express";
-import { getUserById, getUserByStripeCustomerId } from "../actions/users.js";
-import { logger, stripe, subscriptionMap } from "../utils/index.js";
+
+import { getUserById, getUserByStripeCustomerId } from "@/actions/users";
+import { logger, stripe, subscriptionMap } from "@/utils";
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ dotenv.config();
  * @param {express.Response} res - The outgoing response object.
  * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
-export const getAllStripePlans = async (_req, res) => {
+export const getAllStripePlans = async (req, res) => {
   try {
     const [plans, prices] = await Promise.all([
       stripe.products.list(),

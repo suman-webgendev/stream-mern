@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { getAllVideos, getVideo, uploadVideo } from "../controllers/videos.js";
-import { isAuthenticated } from "../middlewares/index.js";
-import { rateLimiter } from "../utils/index.js";
+
+import { getAllVideos, getVideo, uploadVideo } from "@/controllers/videos";
+import { isAuthenticated } from "@/middlewares";
+import { rateLimiter } from "@/utils";
 
 /**
  * @param {Router} router

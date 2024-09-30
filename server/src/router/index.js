@@ -1,13 +1,13 @@
 "use strict";
 
 import express from "express";
-import admin from "./admin.js";
-import authentication from "./authentication.js";
+import admin from "./admin";
+import authentication from "./authentication";
 import chat from "./chat.js";
-import messages from "./messages.js";
-import payment from "./payment.js";
-import users from "./users.js";
-import videos from "./videos.js";
+import messages from "./messages";
+import payment from "./payment";
+import users from "./users";
+import videos from "./videos";
 
 const router = express.Router();
 

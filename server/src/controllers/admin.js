@@ -3,14 +3,15 @@
 import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken";
+
 import {
   getAdminByEmail,
   getAdminBySessionToken,
   getAdmins,
-} from "../actions/admin.js";
-import { getUsers } from "../actions/users.js";
-import { getVideos } from "../actions/videos.js";
-import { authentication, logger, readImageFile } from "../utils/index.js";
+} from "@/actions/admin";
+import { getUsers } from "@/actions/users";
+import { getVideos } from "@/actions/videos";
+import { authentication, logger, readImageFile } from "@/utils";
 
 dotenv.config();
 
@@ -61,7 +62,7 @@ export const handleLogin = async (req, res) => {
     if (!admin)
       return res.render("login", {
         title: "Login",
-        error: "User not found!",
+        error: "Invalid credentials!",
       });
 
     const expectedHash = authentication(admin.authentication.salt, password);

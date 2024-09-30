@@ -1,6 +1,6 @@
 "use strict";
 
-import { db } from "../db/index.js";
+import { db } from "@/db";
 
 export const getUsers = () => db.User.find().sort([["createdAt", -1]]);
 
@@ -8,6 +8,11 @@ export const getUserById = (id) => db.User.findById(id);
 
 export const getUserByEmail = (email) => db.User.findOne({ email });
 
+/**
+ * Description
+ * @param {string} sessionToken
+ * @returns {Promise<db.User>}
+ */
 export const getUserBySessionToken = (sessionToken) =>
   db.User.findOne({
     "authentication.sessionToken": sessionToken,

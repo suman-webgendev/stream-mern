@@ -3,12 +3,13 @@
 import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken";
+
 import {
   createUser,
   getUserByEmail,
   getUserBySessionToken,
-} from "../actions/users.js";
-import { authentication, logger, random } from "../utils/index.js";
+} from "@/actions/users";
+import { authentication, logger, random } from "@/utils";
 
 dotenv.config();
 

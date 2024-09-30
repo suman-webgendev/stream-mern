@@ -2,9 +2,10 @@
 
 import express from "express";
 import pkg from "lodash";
-import { getAdminBySessionToken } from "../actions/admin.js";
-import { logger } from "../utils/index.js";
 const { merge } = pkg;
+
+import { getAdminBySessionToken } from "@/actions/admin";
+import { logger } from "@/utils";
 
 /**
  * This middleware takes `req`, `res` and `next` as input. It uses the cookie to check if admin is authenticated or not.
