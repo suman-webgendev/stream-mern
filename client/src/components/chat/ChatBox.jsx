@@ -1,9 +1,12 @@
+import { lazy, Suspense } from "react";
+
 import { useChat } from "@/hooks/useChat";
 import { Box } from "@chakra-ui/react";
-import SingleChat from "./SingleChat";
+import ChatLoading from "./ChatLoading";
 
 const ChatBox = () => {
   const { selectedChat } = useChat();
+  const SingleChat = () => lazy(() => import("./SingleChat"));
   return (
     <Box
       display={{ base: selectedChat ? "flex" : "none", md: "flex" }}
@@ -15,7 +18,9 @@ const ChatBox = () => {
       borderRadius="lg"
       borderWidth="1px"
     >
-      <SingleChat />
+      <Suspense fallback={<ChatLoading />}>
+        <SingleChat />
+      </Suspense>
     </Box>
   );
 };
