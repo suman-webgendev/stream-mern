@@ -1,26 +1,21 @@
 import UserBadgeItem from "@/components/chat/UserBadgeItem";
 import UserListItem from "@/components/chat/UserListItem";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/utils";
-import {
-  Button,
-  FormControl,
-  IconButton,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { FormControl } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -29,11 +24,9 @@ const UpdateGroupModal = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const queryClient = useQueryClient();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const { selectedChat, setSelectedChat } = useChat();
-
   const { user: currentUser } = useAuth();
-
   const debouncedInput = useDebounce(searchQuery, 300);
 
   const { mutateAsync: search, isPending: isLoadingSearch } = useMutation({
@@ -47,12 +40,11 @@ const UpdateGroupModal = () => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Error fetching the chat.",
+      toast.error("Error fetching the chat!", {
         description: error.message,
-        status: "error",
+        dismissible: true,
         duration: 3000,
-        isClosable: true,
+        position: "bottom-right",
       });
     },
   });
@@ -70,12 +62,11 @@ const UpdateGroupModal = () => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Error renaming the group.",
+      toast.error("Error renaming the group!", {
         description: error.message,
-        status: "error",
+        dismissible: true,
         duration: 3000,
-        isClosable: true,
+        position: "bottom-right",
       });
     },
     onSettled: async () => {
@@ -97,12 +88,11 @@ const UpdateGroupModal = () => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Error adding a new member to the group.",
+      toast.error("Error adding a new member to the group.", {
         description: error.message,
-        status: "error",
+        dismissible: true,
         duration: 3000,
-        isClosable: true,
+        position: "bottom-right",
       });
     },
     onSettled: async () => {
@@ -124,12 +114,11 @@ const UpdateGroupModal = () => {
     },
     onError: (error) => {
       setSearchResults([]);
-      toast({
-        title: "Error removing member to the group.",
+      toast.error("Error removing member to the group.", {
         description: error.message,
-        status: "error",
+        dismissible: true,
         duration: 3000,
-        isClosable: true,
+        position: "bottom-right",
       });
     },
     onSettled: async () => {
@@ -152,23 +141,19 @@ const UpdateGroupModal = () => {
   const handleGroup = useCallback(
     (userToAdd) => {
       if (selectedChat.users.find((u) => u._id === userToAdd._id)) {
-        toast({
-          title: "User already exist",
-          status: "error",
+        toast.warning("User already exist", {
+          dismissible: true,
           duration: 3000,
-          isClosable: true,
-          position: "bottom",
+          position: "bottom-right",
         });
         return;
       }
 
       if (selectedChat.groupAdmin._id !== currentUser._id) {
-        toast({
-          title: "Only admins can add a new member",
-          status: "error",
+        toast.warning("Only admins can add new member.", {
+          dismissible: true,
           duration: 3000,
-          isClosable: true,
-          position: "bottom",
+          position: "bottom-right",
         });
         return;
       }
@@ -180,12 +165,10 @@ const UpdateGroupModal = () => {
   const handleRemove = useCallback(
     (userToRemove) => {
       if (selectedChat.groupAdmin._id !== currentUser._id) {
-        toast({
-          title: "Only admins can remove a member",
-          status: "error",
+        toast.warning("Only admins can remove a member.", {
+          dismissible: true,
           duration: 3000,
-          isClosable: true,
-          position: "bottom",
+          position: "bottom-right",
         });
         return;
       }
@@ -197,12 +180,10 @@ const UpdateGroupModal = () => {
   const handleRename = useCallback(() => {
     if (!groupChatName) return;
     if (selectedChat.groupAdmin._id !== currentUser._id) {
-      toast({
-        title: "Only admins can rename the group",
-        status: "error",
+      toast.warning("Only admins can add new member.", {
+        dismissible: true,
         duration: 3000,
-        isClosable: true,
-        position: "bottom",
+        position: "bottom-right",
       });
       return;
     }
@@ -210,78 +191,74 @@ const UpdateGroupModal = () => {
   }, [rename, groupChatName, currentUser, selectedChat]);
 
   return (
-    <>
-      <IconButton
-        display={{ base: "flex" }}
-        icon={<Pencil />}
-        onClick={onOpen}
-      />
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="flex">
+          <Pencil />
+        </Button>
+      </DialogTrigger>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader fontSize="35px" display="flex" justifyContent="center">
-            {selectedChat.chatName}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <div className="flex w-full flex-wrap pb-3">
-              {selectedChat.users.map((user) => (
-                <UserBadgeItem
-                  key={user._id}
-                  user={user}
-                  handleClick={() => handleRemove(user)}
-                />
-              ))}
-            </div>
-            <FormControl display="flex">
-              <Input
-                placeholder="Group Name"
-                mb={3}
-                value={groupChatName}
-                onChange={(e) => setGroupChatName(e.target.value)}
-              />
-              <Button
-                variant="solid"
-                colorScheme="teal"
-                ml={1}
-                isLoading={renameLoading}
-                onClick={handleRename}
-              >
-                Update
-              </Button>
-            </FormControl>
-            <FormControl>
-              <Input
-                placeholder="Add users to the group"
-                mb={1}
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </FormControl>
-            {isLoadingSearch ? (
-              <Spinner size="lg" />
-            ) : (
-              searchResults.length > 0 &&
-              searchResults
-                ?.slice(0, 4)
-                .map((user) => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleClick={() => handleGroup(user)}
-                  />
-                ))
-            )}
-          </ModalBody>
+      <DialogContent>
+        <DialogHeader className="flex justify-center text-4xl">
+          {selectedChat.chatName}
+        </DialogHeader>
 
-          <ModalFooter>
-            <Button colorScheme="red" onClick={() => handleRemove(currentUser)}>
-              Leave Group
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+        <div className="flex w-full flex-wrap pb-3">
+          {selectedChat.users.map((user) => (
+            <UserBadgeItem
+              key={user._id}
+              user={user}
+              handleClick={() => handleRemove(user)}
+            />
+          ))}
+        </div>
+        <FormControl display="flex">
+          <Input
+            placeholder="Group Name"
+            className="mb-3 mr-2"
+            value={groupChatName}
+            onChange={(e) => setGroupChatName(e.target.value)}
+          />
+          <Button
+            className="ml-1 bg-teal-400 hover:bg-teal-500"
+            isLoading={renameLoading}
+            onClick={handleRename}
+          >
+            Update
+          </Button>
+        </FormControl>
+        <FormControl>
+          <Input
+            placeholder="Add users to the group"
+            className="mb-1"
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </FormControl>
+        {isLoadingSearch ? (
+          <Loader2 className="size-6 animate-spin" />
+        ) : (
+          searchResults.length > 0 &&
+          searchResults
+            ?.slice(0, 4)
+            .map((user) => (
+              <UserListItem
+                key={user._id}
+                user={user}
+                handleClick={() => handleGroup(user)}
+              />
+            ))
+        )}
+
+        <DialogFooter>
+          <Button
+            className="bg-red-500"
+            onClick={() => handleRemove(currentUser)}
+          >
+            Leave Group
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

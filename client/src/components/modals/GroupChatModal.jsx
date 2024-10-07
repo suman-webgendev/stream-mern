@@ -52,6 +52,7 @@ const GroupChatModal = ({ children }) => {
         dismissible: true,
       });
     },
+    onSettled: () => {},
   });
 
   const handleSubmit = useCallback(() => {

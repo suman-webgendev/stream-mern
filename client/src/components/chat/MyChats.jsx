@@ -57,7 +57,7 @@ const MyChats = () => {
                 key={chat._id}
                 onClick={() => setSelectedChat(chat)}
                 className={cn(
-                  "cursor-pointer rounded-lg bg-[#e8e8e8] px-3 py-2 text-black",
+                  "mb-2 cursor-pointer rounded-lg bg-[#e8e8e8] px-3 py-2 text-black",
                   selectedChat === chat && "bg-[#38B2AC] text-white",
                 )}
               >
@@ -66,7 +66,7 @@ const MyChats = () => {
                     ? getSender(user, chat.users)
                     : chat.chatName}
                 </p>
-                {chat?.lastMessage && (
+                {chat?.lastMessage ? (
                   <div className="flex items-center space-x-2">
                     <Avatar>
                       <AvatarImage src="/user.jpg" alt="user" />
@@ -87,6 +87,8 @@ const MyChats = () => {
                           (chat?.lastMessage?.content.length > 6 ? "..." : "")}
                     </p>
                   </div>
+                ) : (
+                  <p>No messages yet.</p>
                 )}
               </div>
             ))}

@@ -81,7 +81,7 @@ export const allMessages = async (req, res) => {
     const messages = await db.Message.find({ chat: chatId })
       .populate("sender", "name email")
       .sort({ createdAt: 1 })
-      .skip(skip)
+      .skip(skip > 0 ? skip : 1)
       .limit(limit);
 
     return res.json({
