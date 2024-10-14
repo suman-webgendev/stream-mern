@@ -1,5 +1,4 @@
-import { api } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useAuthCheck } from "@/hooks/auth";
 import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
@@ -9,18 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
-  const {
-    data,
-    isLoading: queryLoading,
-    error,
-  } = useQuery({
-    queryKey: ["authCheck"],
-    queryFn: async () => {
-      const response = await api.get("/api/auth/check");
-      return response.data;
-    },
-    refetchInterval: 5 * 60 * 1000,
-  });
+  const { data, isLoading: queryLoading, error } = useAuthCheck();
 
   useEffect(() => {
     if (!queryLoading) {

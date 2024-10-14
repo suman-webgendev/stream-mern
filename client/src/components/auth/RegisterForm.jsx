@@ -11,13 +11,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/utils";
 import { registerSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRegister } from "../../hooks/auth";
 
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,18 +29,7 @@ const RegisterForm = () => {
     },
   });
 
-  const {
-    mutateAsync: register,
-    data,
-    isError,
-    error,
-    isPending,
-  } = useMutation({
-    mutationFn: async (values) => {
-      const response = await api.post("/api/auth/register", values);
-      return response.data;
-    },
-  });
+  const { mutateAsync: register, data, error, isPending } = useRegister();
 
   const onSubmit = async (values) => {
     await register(values);
@@ -127,7 +115,7 @@ const RegisterForm = () => {
               )}
             />
           </div>
-          {isError && (
+          {!!error && (
             <FormError
               message={error?.response?.data?.message || "An error occurred"}
             />

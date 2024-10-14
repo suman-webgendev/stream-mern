@@ -1,4 +1,4 @@
-import { useChat } from "@/hooks/useChat";
+import { useChat } from "@/hooks/chats";
 import { cn } from "@/lib/utils";
 import SingleChat from "./SingleChat";
 

@@ -10,13 +10,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useChat } from "@/hooks/useChat";
+import { useChat, useGroupChatCreate, useSearchUser } from "@/hooks/chats";
 import { useDebounce } from "@/hooks/useDebounce";
-import { api } from "@/lib/utils";
 import { FormControl } from "@chakra-ui/react";
-import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const GroupChatModal = ({ children }) => {
@@ -24,36 +22,17 @@ const GroupChatModal = ({ children }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [open, setOpen] = useState(false);
 
   const { chats, setChats } = useChat();
 
-  const { mutateAsync: createGroup } = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.post("/api/chat/group/create", {
-        name: groupChatName,
-        users: JSON.stringify(selectedUsers.map((user) => user._id)),
-      });
-      return data;
-    },
-    onSuccess: (data) => {
-      setChats([data, ...chats]);
-      toast.success("New Group Created", {
-        description: "Group created successfully!",
-        duration: 3000,
-        position: "bottom-right",
-        dismissible: true,
-      });
-    },
-    onError: (error) => {
-      toast.error("Failed to create group", {
-        description: error.response.data.message,
-        duration: 3000,
-        position: "bottom-right",
-        dismissible: true,
-      });
-    },
-    onSettled: () => {},
-  });
+  const { mutateAsync: createGroup } = useGroupChatCreate(
+    selectedUsers,
+    setChats,
+    chats,
+    toast,
+    setOpen,
+  );
 
   const handleSubmit = useCallback(() => {
     if (!groupChatName || !selectedUsers) {
@@ -65,7 +44,7 @@ const GroupChatModal = ({ children }) => {
       return;
     }
 
-    createGroup();
+    createGroup(groupChatName);
   }, [createGroup, groupChatName, selectedUsers]);
 
   const handleDelete = useCallback(
@@ -91,27 +70,15 @@ const GroupChatModal = ({ children }) => {
     [selectedUsers],
   );
 
-  const debouncedInput = useDebounce(searchQuery, 300);
+  const memoizedSearch = useMemo(() => searchQuery, [searchQuery]);
+  const debouncedInput = useDebounce(memoizedSearch, 300);
 
-  const { mutateAsync: search, isPending } = useMutation({
-    mutationFn: async (query) => {
-      if (!query) return [];
-      const { data } = await api.get(`/api/chat/find-user?search=${query}`);
-      return data;
-    },
-    onSuccess: (data) => {
-      setSearchResults(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Error fetching the chat.", {
-        description: error.message,
-        duration: 3000,
-        position: "bottom-left",
-        dismissible: true,
-      });
-    },
-  });
+  const { mutateAsync: search, isPending } = useSearchUser(
+    searchQuery,
+    toast,
+    debouncedInput,
+    setSearchResults,
+  );
 
   useEffect(() => {
     if (debouncedInput) {
@@ -126,7 +93,7 @@ const GroupChatModal = ({ children }) => {
   }, []);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <span>{children}</span>
       </DialogTrigger>

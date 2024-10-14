@@ -1,27 +1,18 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import GroupChatModal from "@/components/modals/GroupChatModal";
-import { useAuth } from "@/hooks/useAuth";
-import { useChat } from "@/hooks/useChat";
-import { api, cn, getSender } from "@/lib/utils";
+import { useAuth } from "@/hooks/auth";
+import { useAllChats, useChat } from "@/hooks/chats";
+import { cn, getSender } from "@/lib/utils";
 import ChatLoading from "./ChatLoading";
 
 const MyChats = () => {
-  const { selectedChat, setSelectedChat, chats, setChats } = useChat();
+  const { selectedChat, setSelectedChat, setChats, chats } = useChat();
   const { user } = useAuth();
-
-  const { error } = useQuery({
-    queryKey: ["AllChats"],
-    queryFn: async () => {
-      const { data } = await api.get("/api/chat");
-      setChats(Array.isArray(data) ? data : []);
-      return data;
-    },
-  });
+  const { error } = useAllChats(setChats);
 
   if (error) {
     toast.error("Error occurred!", {

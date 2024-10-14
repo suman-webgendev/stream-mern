@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMutation } from "@tanstack/react-query";
 import { Bell, Loader, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -10,10 +9,10 @@ import ChatLoading from "@/components/chat/ChatLoading";
 import NotificationBadge from "@/components/chat/NotificationBadge";
 import UserListItem from "@/components/chat/UserListItem";
 import ProfileModal from "@/components/modals/ProfileModal";
-import { useAuth } from "@/hooks/useAuth";
-import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/hooks/auth";
+import { useAccessChats, useChat, useSearchUser } from "@/hooks/chats";
 import { useDebounce } from "@/hooks/useDebounce";
-import { api, getSender } from "@/lib/utils";
+import { getSender } from "@/lib/utils";
 
 import {
   Drawer,
@@ -27,6 +26,7 @@ import {
   MenuList,
   useDisclosure,
 } from "@chakra-ui/react";
+import { useMemo } from "react";
 
 const SideDrawer = () => {
   const [searchResults, setSearchResults] = useState([]);
@@ -36,7 +36,8 @@ const SideDrawer = () => {
 
   const { chats, setChats, setSelectedChat, notifications, setNotifications } =
     useChat();
-  const debouncedSearch = useDebounce(search);
+  const memoizedSearch = useMemo(() => search, [search]);
+  const debouncedSearch = useDebounce(memoizedSearch);
 
   useEffect(() => {
     if ("Notification" in window) Notification.requestPermission();
@@ -60,58 +61,20 @@ const SideDrawer = () => {
     }
   }, [notifications, user]);
 
-  const { mutateAsync: accessChat, isPending: loadingChats } = useMutation({
-    mutationFn: async (userId) => {
-      const { data } = await api.post("/api/chat", { userId });
-      return data;
-    },
-    onSuccess: (data) => {
-      if (!chats.find((c) => c._id === data._id)) setChats(data, ...chats);
-      setSelectedChat(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Error fetching the chat.", {
-        description: error.message,
-        duration: 3000,
-        dismissible: true,
-      });
-    },
-    onSettled: () => {
-      onClose();
-    },
-  });
+  const { mutateAsync: accessChat, isPending: loadingChats } = useAccessChats(
+    setChats,
+    chats,
+    setSelectedChat,
+    toast,
+    setSearchResults,
+    onClose,
+  );
 
   const {
     mutateAsync: searchUsers,
     isPending,
     isSuccess,
-  } = useMutation({
-    mutationFn: async () => {
-      if (!search.trim()) {
-        toast.error("Search failed", {
-          description: "Please enter something to search",
-          dismissible: true,
-          duration: 3000,
-        });
-      }
-      const { data } = await api.get(
-        `/api/chat/find-user?search=${debouncedSearch}`,
-      );
-      return data;
-    },
-    onSuccess: (data) => {
-      setSearchResults(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Search failed", {
-        description: error.message,
-        dismissible: true,
-        duration: 3000,
-      });
-    },
-  });
+  } = useSearchUser(search, toast, debouncedSearch, setSearchResults);
 
   return (
     <>

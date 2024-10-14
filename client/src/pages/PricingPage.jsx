@@ -1,24 +1,7 @@
 import PricingCardLoading from "@/components/payment/PricingCardLoading";
-import { api } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-
-const verifySession = async (sessionId = null, subscriptionId = null) => {
-  if (sessionId) {
-    const { data } = await api.post("/api/subscription/verify-session", {
-      sessionId,
-    });
-
-    return data;
-  }
-  if (subscriptionId) {
-    const { data } = await api.post("/api/subscription/verify-session", {
-      subscriptionId,
-    });
-    return data;
-  }
-};
+import { useSessionVerification } from "../hooks/stripe";
 
 const PricingPage = () => {
   const PricingCard = lazy(() => import("@/components/payment/PricingCard"));
@@ -33,15 +16,7 @@ const PricingPage = () => {
     data: verificationData,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["verifySession", sessionId | subscriptionId],
-    queryFn: () => verifySession(sessionId, subscriptionId),
-    enabled: !!(
-      (sessionId != null || subscriptionId != null) &&
-      status === "success"
-    ),
-    retry: false,
-  });
+  } = useSessionVerification(subscriptionId, sessionId, status);
 
   useEffect(() => {
     if (!isLoading && (verificationData || isError)) {

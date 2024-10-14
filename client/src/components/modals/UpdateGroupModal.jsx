@@ -9,122 +9,66 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
-import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/hooks/auth";
+import {
+  useAddMember,
+  useChat,
+  useGroupRename,
+  useRemoveMember,
+  useSearchUser,
+} from "@/hooks/chats";
 import { useDebounce } from "@/hooks/useDebounce";
-import { api } from "@/lib/utils";
 import { FormControl } from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Pencil } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const UpdateGroupModal = () => {
   const [groupChatName, setGroupChatName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { selectedChat, setSelectedChat } = useChat();
   const { user: currentUser } = useAuth();
-  const debouncedInput = useDebounce(searchQuery, 300);
+  const memoizedSearch = useMemo(() => searchQuery, [searchQuery]);
+  const debouncedInput = useDebounce(memoizedSearch, 300);
 
-  const { mutateAsync: search, isPending: isLoadingSearch } = useMutation({
-    mutationFn: async (query) => {
-      if (!query) return [];
-      const { data } = await api.get(`/api/chat/find-user?search=${query}`);
-      return data;
-    },
-    onSuccess: (data) => {
-      setSearchResults(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Error fetching the chat!", {
-        description: error.message,
-        dismissible: true,
-        duration: 3000,
-        position: "bottom-right",
-      });
-    },
-  });
+  const { mutateAsync: search, isPending: isLoadingSearch } = useSearchUser(
+    searchQuery,
+    toast,
+    debouncedInput,
+    setSearchResults,
+  );
 
-  const { mutateAsync: rename, isPending: renameLoading } = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.put("/api/chat/group/rename", {
-        groupId: selectedChat._id,
-        groupName: groupChatName,
-      });
-      return data;
-    },
-    onSuccess: (data) => {
-      setSelectedChat(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Error renaming the group!", {
-        description: error.message,
-        dismissible: true,
-        duration: 3000,
-        position: "bottom-right",
-      });
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["AllChats"] });
-      setGroupChatName("");
-    },
-  });
+  const { mutateAsync: rename, isPending: renameLoading } = useGroupRename(
+    setSelectedChat,
+    setSearchResults,
+    toast,
+    setGroupChatName,
+    selectedChat,
+    groupChatName,
+    queryClient,
+  );
 
-  const { mutateAsync: addUser } = useMutation({
-    mutationFn: async (user) => {
-      const { data } = await api.put("/api/chat/group/add", {
-        groupId: selectedChat._id,
-        userId: user._id,
-      });
-      return data;
-    },
-    onSuccess: (data) => {
-      setSelectedChat(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Error adding a new member to the group.", {
-        description: error.message,
-        dismissible: true,
-        duration: 3000,
-        position: "bottom-right",
-      });
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["AllChats"] });
-    },
-  });
+  const { mutateAsync: addUser } = useAddMember(
+    selectedChat,
+    setSelectedChat,
+    setSearchResults,
+    toast,
+    queryClient,
+  );
 
-  const { mutateAsync: removeUser } = useMutation({
-    mutationFn: async (user) => {
-      const { data } = await api.put("/api/chat/group/remove", {
-        groupId: selectedChat._id,
-        userId: user._id,
-      });
-
-      return data;
-    },
-    onSuccess: (data, user) => {
-      user._id === currentUser._id ? setSelectedChat() : setSelectedChat(data);
-    },
-    onError: (error) => {
-      setSearchResults([]);
-      toast.error("Error removing member to the group.", {
-        description: error.message,
-        dismissible: true,
-        duration: 3000,
-        position: "bottom-right",
-      });
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["AllChats"] });
-    },
-  });
+  const { mutateAsync: removeUser } = useRemoveMember(
+    selectedChat,
+    currentUser,
+    setSelectedChat,
+    setSearchResults,
+    queryClient,
+    toast,
+  );
 
   useEffect(() => {
     if (debouncedInput) {
@@ -191,7 +135,7 @@ const UpdateGroupModal = () => {
   }, [rename, groupChatName, currentUser, selectedChat]);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="flex">
           <Pencil />

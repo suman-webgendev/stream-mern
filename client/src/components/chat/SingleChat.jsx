@@ -8,8 +8,8 @@ import io from "socket.io-client";
 import { toast } from "sonner";
 
 import UpdateGroupModal from "@/components/modals/UpdateGroupModal";
-import { useAuth } from "@/hooks/useAuth";
-import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/hooks/auth";
+import { useChat } from "@/hooks/chats";
 import { api, getSender } from "@/lib/utils";
 import MessageBox from "./MessageBox";
 import MyMessage from "./MyMessage";

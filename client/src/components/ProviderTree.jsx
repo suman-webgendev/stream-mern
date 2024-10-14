@@ -1,8 +1,8 @@
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ChatProvider } from "@/components/providers/ChatProvider";
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
-import { ChatProvider } from "./providers/ChatProvider";
 
 const queryClient = new QueryClient();
 

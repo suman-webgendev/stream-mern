@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 import { Box } from "@chakra-ui/react";
 import { lazy, Suspense } from "react";
 

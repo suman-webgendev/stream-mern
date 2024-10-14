@@ -70,7 +70,7 @@ export const handleLogin = async (req, res) => {
     if (admin.authentication.password !== expectedHash)
       return res.render("login", {
         title: "Login",
-        error: "Password mismatch!",
+        error: "Invalid credentials!",
       });
 
     const token = jwt.sign(

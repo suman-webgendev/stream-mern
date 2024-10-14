@@ -1,7 +1,11 @@
-import { useAuth } from "@/hooks/useAuth";
-import { api, cn, formatPriceData } from "@/lib/utils";
-import { loadStripe } from "@stripe/stripe-js";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/auth";
+import {
+  useBillingPortalSession,
+  useCreateSubscription,
+  useStripePublishableKey,
+  useStripeSubscriptionPlans,
+} from "@/hooks/stripe";
+import { cn, formatPriceData } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Suspense, useState } from "react";
@@ -12,49 +16,10 @@ const PricingCard = () => {
   const [isAnnual, setIsAnnual] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const { data: stripePublishableKey } = useQuery({
-    queryKey: ["stripe-publishable-key"],
-    queryFn: async () => {
-      const { data } = await api.get(
-        "/api/subscription/get-stripe-publishable-key",
-      );
-      return data.publishableKey;
-    },
-  });
-
-  const {
-    data: apiResponse,
-    isFetching,
-    error,
-  } = useQuery({
-    queryKey: ["priceTable"],
-    queryFn: async () => {
-      const { data } = await api.get("/api/subscription/plans");
-      return data;
-    },
-  });
-
-  const createSubscriptionMutation = useMutation({
-    mutationFn: async (priceId) => {
-      const { data } = await api.post("/api/subscriptions", { priceId });
-      return data;
-    },
-    onSuccess: async (data) => {
-      const stripe = await loadStripe(stripePublishableKey);
-      await stripe.redirectToCheckout({ sessionId: data.sessionId });
-    },
-  });
-
-  const createBillingPortalSessionMutation = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.post("/api/subscription/billing-portal");
-      return data;
-    },
-    onSuccess: (data) => {
-      window.location.href = data.url;
-    },
-  });
+  const { data: stripePublishableKey } = useStripePublishableKey();
+  const { data: apiResponse, isFetching, error } = useStripeSubscriptionPlans();
+  const createSubscription = useCreateSubscription(stripePublishableKey);
+  const billingPortalSession = useBillingPortalSession();
 
   const priceData = formatPriceData(apiResponse);
   const containerVariants = {
@@ -81,7 +46,7 @@ const PricingCard = () => {
   };
 
   const handlePurchase = (priceId) => {
-    // createSubscriptionMutation.mutate(priceId);
+    // createSubscription.mutate(priceId);
 
     const selectedPlan = apiResponse.plans.find((plan) =>
       plan.prices.some((price) => price.id === priceId),
@@ -99,7 +64,7 @@ const PricingCard = () => {
     });
   };
   const handleManagePlan = () => {
-    createBillingPortalSessionMutation.mutate();
+    billingPortalSession.mutate();
   };
 
   const isCurrentPlan = (planPrice) => {
@@ -241,12 +206,12 @@ const PricingCard = () => {
                                   )
                             }
                             disabled={
-                              createSubscriptionMutation.isLoading ||
-                              createBillingPortalSessionMutation.isLoading
+                              createSubscription.isLoading ||
+                              billingPortalSession.isLoading
                             }
                           >
-                            {createSubscriptionMutation.isLoading ||
-                            createBillingPortalSessionMutation.isLoading
+                            {createSubscription.isLoading ||
+                            billingPortalSession.isLoading
                               ? "Processing..."
                               : isCurrentPlan(
                                     isAnnual

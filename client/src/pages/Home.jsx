@@ -1,26 +1,12 @@
 import Loading from "@/components/Loading";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { api } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useVideoList } from "@/hooks/video";
 import { motion } from "framer-motion";
 import { lazy, Suspense } from "react";
 
 const Home = () => {
   const VideoList = lazy(() => import("@/components/VideoList"));
-  const {
-    data: videos,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["VideoList"],
-    queryFn: async () => {
-      const res = await api.get("/api/video");
-      if (res.status !== 200) {
-        throw new Error("Failed to fetch videos!");
-      }
-      return res.data;
-    },
-  });
+  const { data: videos, error, isFetching } = useVideoList();
   if (isFetching && !error) {
     return <Loading />;
   }

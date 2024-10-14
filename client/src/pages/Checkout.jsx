@@ -1,9 +1,8 @@
 import CardPaymentFormLoading from "@/components/payment/CardPaymentFormLoading";
 import { AuroraBackground } from "@/components/ui/aurora-background";
-import { api } from "@/lib/utils";
+import { useStripePublishableKey } from "@/hooks/stripe";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { lazy, Suspense } from "react";
 
@@ -12,15 +11,7 @@ const Checkout = () => {
     () => import("@/components/payment/CardPaymentForm"),
   );
 
-  const { data: stripePublishableKey } = useQuery({
-    queryKey: ["stripe-publishable-key"],
-    queryFn: async () => {
-      const { data } = await api.get(
-        "/api/subscription/get-stripe-publishable-key",
-      );
-      return data.publishableKey;
-    },
-  });
+  const { data: stripePublishableKey } = useStripePublishableKey();
 
   return (
     <AuroraBackground>

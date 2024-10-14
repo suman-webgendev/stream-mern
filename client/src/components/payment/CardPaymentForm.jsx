@@ -8,7 +8,8 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { api, formatAmount } from "@/lib/utils";
+import { useStripeCheckout } from "@/hooks/stripe";
+import { formatAmount, generateStripeToken } from "@/lib/utils";
 import { cardSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,7 +19,6 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import { useMutation } from "@tanstack/react-query";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -42,53 +42,26 @@ const CardPaymentForm = () => {
     },
   });
 
-  const generateStripeToken = async (values) => {
-    try {
-      if (!stripe || !elements) return;
-
-      const cardElement = elements.getElement(CardNumberElement);
-      const { error, token } = await stripe.createToken(cardElement, {
-        name: values.name,
-        address_zip: values.postalCode,
-        phone: values.phoneNumber.replace(/\D/g, ""),
-      });
-
-      if (!token || error) {
-        throw error;
-      }
-      return token;
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   const stripeElementOptions = {
     showIcon: true,
   };
 
-  const subscriptionMutation = useMutation({
-    mutationFn: async (token) => {
-      if (!token || !priceId) return;
-      const { data } = await api.post("/api/subscription/checkout", {
-        token,
-        priceId,
-      });
-      return data;
-    },
-    onSuccess: (data) => {
-      navigate(
-        "/pricing?status=success&subscriptionId=" + data.subscription.id,
-      );
-    },
-    onError: (error) => {
-      setError(error.message);
-    },
-  });
+  const { mutateAsync: subscriptionMutation } = useStripeCheckout(
+    priceId,
+    setError,
+    navigate,
+  );
 
   const onSubmit = async (values) => {
     try {
-      const token = await generateStripeToken(values);
-      await subscriptionMutation.mutateAsync(token);
+      const token = await generateStripeToken(
+        values,
+        elements,
+        stripe,
+        setError,
+        CardNumberElement,
+      );
+      await subscriptionMutation(token);
       setError(null);
     } catch (error) {
       setError(error.response.data.message);

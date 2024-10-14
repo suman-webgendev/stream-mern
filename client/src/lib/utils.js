@@ -105,3 +105,29 @@ export const formatAmount = (amount) => {
     maximumFractionDigits: 2,
   }).format(amount);
 };
+
+export const generateStripeToken = async (
+  values,
+  elements,
+  stripe,
+  setError,
+  CardNumberElement,
+) => {
+  try {
+    if (!stripe || !elements) return;
+
+    const cardElement = elements.getElement(CardNumberElement);
+    const { error, token } = await stripe.createToken(cardElement, {
+      name: values.name,
+      address_zip: values.postalCode,
+      phone: values.phoneNumber.replace(/\D/g, ""),
+    });
+
+    if (!token || error) {
+      throw error;
+    }
+    return token;
+  } catch (err) {
+    setError(err.message);
+  }
+};

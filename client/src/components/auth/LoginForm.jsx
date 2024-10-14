@@ -10,10 +10,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/utils";
+import { useSignIn } from "@/hooks/auth";
 import { loginSchema } from "@/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -30,21 +29,7 @@ const LoginForm = () => {
     },
   });
 
-  const {
-    mutateAsync: login,
-    isError,
-    error,
-    isPending,
-  } = useMutation({
-    mutationFn: async (values) => {
-      const response = await api.post("/api/auth/login", values);
-      return response.data;
-    },
-    onSuccess: () => {
-      navigate("/");
-      navigate(0);
-    },
-  });
+  const { mutateAsync: login, isError, error, isPending } = useSignIn(navigate);
 
   const onSubmit = async (values) => {
     await login(values);

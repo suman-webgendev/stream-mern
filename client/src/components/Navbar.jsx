@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/lib/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth, useLogout } from "@/hooks/auth";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -9,17 +8,11 @@ const Navbar = () => {
   const queryClient = useQueryClient();
   const { isAuthenticated, setIsAuthenticated } = useAuth();
 
-  const { mutateAsync: logOut, isPending } = useMutation({
-    mutationFn: async () => {
-      const response = await api.post("/api/auth/logout");
-      return response.data;
-    },
-    onSuccess: () => {
-      setIsAuthenticated(false);
-      queryClient.invalidateQueries(["authCheck"]);
-      navigate("/login");
-    },
-  });
+  const { mutateAsync: logOut, isPending } = useLogout(
+    setIsAuthenticated,
+    navigate,
+    queryClient,
+  );
 
   const handleSignOut = async () => {
     await logOut();
