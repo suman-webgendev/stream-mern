@@ -415,6 +415,80 @@ export const createBillingPortalSession = async (req, res) => {
   }
 };
 
+/**
+ * This function returns the stripe publishable key to the client.
+ *
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
+ */
+export const getStripePublishableKey = async (req, res) => {
+  try {
+    const publishableKey = process.env.STRIPE_PUBLISH_KEY;
+    return res.status(200).json({ publishableKey });
+  } catch (error) {
+    logger.error("[STRIPE_PUBLISHABLE_KEY]: ", error);
+    return res.status(500).json({
+      message: "Failed to get stripe publishable key.",
+    });
+  }
+};
+
+/**
+ * This function creates a link for the customer to connect their account.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ */
+export const createAccountConnectLink = async (req, res) => {
+  try {
+    const { account } = req.body;
+    console.log(account);
+
+    const accountLink = await stripe.accountLinks.create({
+      account: account,
+
+      // TODO: Fix the return and refresh urls in the frontend
+      return_url: `${req.headers.origin}/return/${account}`,
+      refresh_url: `${req.headers.origin}/refresh/${account}`,
+      type: "account_onboarding",
+    });
+
+    res.json(accountLink);
+  } catch (error) {
+    logger.error("[ACCOUNT_CONNECT_LINK]: ", error);
+    return res.status(500).json({
+      message: "Failed to create account connect link.",
+    });
+  }
+};
+
+/**
+ * This function creates a account for the customer to connect.
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ */
+export const createAccount = async (req, res) => {
+  try {
+    const account = await stripe.accounts.create({
+      type: "express",
+    });
+
+    if (account)
+      logger.success("Account created successfully! ID: " + account.id);
+    res.json({
+      account: account.id,
+    });
+  } catch (error) {
+    logger.error("[ACCOUNT_CREATE]: ", error);
+    return res.status(500).json({
+      message:
+        "An error occurred when calling the Stripe API to create an account.",
+    });
+  }
+};
+
 //*---------------------------------------Custom Checkout Form----------------------------------
 
 /**
@@ -512,25 +586,6 @@ export const createCheckoutSession = async (req, res) => {
 
     return res.status(400).json({
       message: error.message,
-    });
-  }
-};
-
-/**
- * This function returns the stripe publishable key to the client.
- *
- * @param {express.Request} req - The incoming request object.
- * @param {express.Response} res - The outgoing response object.
- * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
- */
-export const getStripePublishableKey = async (req, res) => {
-  try {
-    const publishableKey = process.env.STRIPE_PUBLISH_KEY;
-    return res.status(200).json({ publishableKey });
-  } catch (error) {
-    logger.error("[STRIPE_PUBLISHABLE_KEY]: ", error);
-    return res.status(500).json({
-      message: "Failed to get stripe publishable key.",
     });
   }
 };

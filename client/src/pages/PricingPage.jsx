@@ -1,7 +1,7 @@
 import PricingCardLoading from "@/components/payment/PricingCardLoading";
+import { useSessionVerification } from "@/hooks/stripe";
 import { lazy, Suspense, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useSessionVerification } from "../hooks/stripe";
 
 const PricingPage = () => {
   const PricingCard = lazy(() => import("@/components/payment/PricingCard"));

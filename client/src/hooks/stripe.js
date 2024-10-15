@@ -1,10 +1,8 @@
 import { api } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 
-import { loadConnectAndInitialize } from "@stripe/connect-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 
 export const useStripePublishableKey = () => {
   return useQuery({
@@ -16,41 +14,6 @@ export const useStripePublishableKey = () => {
       return data.publishableKey;
     },
   });
-};
-
-export const useStripeConnect = (connectedAccountId, apiKey) => {
-  const [stripeConnectInstance, setStripeConnectInstance] = useState();
-
-  const { mutateAsync: fetchClientSecret } = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.post("/api/connect/account-session");
-      return data;
-    },
-    onError: (err) => {
-      console.error(err);
-    },
-    onSuccess: (data) => {
-      const { client_secret: clientSecret } = data;
-      return clientSecret;
-    },
-  });
-
-  if (connectedAccountId) {
-    setStripeConnectInstance(
-      loadConnectAndInitialize({
-        publishableKey: apiKey,
-        fetchClientSecret,
-        appearance: {
-          overlays: "dialog",
-          variables: {
-            colorPrimary: "#635BFF",
-          },
-        },
-      }),
-    );
-  }
-
-  return stripeConnectInstance;
 };
 
 export const useStripeSubscriptionPlans = () => {
@@ -146,5 +109,30 @@ export const useSessionVerification = (
       status === "success"
     ),
     retry: false,
+  });
+};
+
+export const useCreateAccount = () => {
+  return useQuery({
+    queryKey: ["account"],
+    queryFn: async () => {
+      const { data } = await api.post("/api/payment/account");
+      return data.account;
+    },
+    refetchOnMount: true,
+  });
+};
+
+export const useAccountLink = () => {
+  return useMutation({
+    mutationFn: async (accountId) => {
+      const { data } = await api.post("/api/payment/account-connect-link", {
+        account: accountId,
+      });
+      return data;
+    },
+    onSuccess: (data) => {
+      window.location.href = data.url;
+    },
   });
 };

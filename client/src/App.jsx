@@ -1,4 +1,5 @@
 import PrivateRoute from "@/components/auth/PrivateRoute";
+import Connect from "@/components/payment/Connect";
 import Chat from "@/pages/Chat";
 import Checkout from "@/pages/Checkout";
 import Home from "@/pages/Home";
@@ -89,6 +90,11 @@ const App = () => {
               path="/checkout"
               element={<CheckoutRoute element={<Checkout />} />}
             />
+
+            <Route path="/connect" element={<Connect />} />
+            {/* <Route path="/refresh/:connectedAccountId" element={<Refresh />} />
+
+            <Route path="/return/:connectedAccountId" element={<Return />} /> */}
           </Route>
         </Route>
       </Routes>

@@ -3,6 +3,8 @@
 import express, { Router } from "express";
 
 import {
+  createAccount,
+  createAccountConnectLink,
   createBillingPortalSession,
   createCheckoutSession,
   createPaymentIntent,
@@ -64,6 +66,22 @@ export default (router) => {
     isAuthenticated,
     rateLimiter(10, 100),
     getStripePublishableKey
+  );
+
+  //? Create account connect link
+  router.post(
+    "/api/payment/account-connect-link",
+    isAuthenticated,
+    rateLimiter(),
+    createAccountConnectLink
+  );
+
+  //? Create account
+  router.post(
+    "/api/payment/account",
+    // isAuthenticated,
+    rateLimiter(),
+    createAccount
   );
 
   //*---------------------------------Custom Checkout Form------------------------------------
