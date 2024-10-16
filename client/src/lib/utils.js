@@ -1,3 +1,5 @@
+"use strict";
+
 import axios from "axios";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";

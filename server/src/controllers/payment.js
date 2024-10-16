@@ -438,7 +438,7 @@ export const getStripePublishableKey = async (req, res) => {
  * This function creates a link for the customer to connect their account.
  * @param {express.Request} req - The incoming request object.
  * @param {express.Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createAccountConnectLink = async (req, res) => {
   try {
@@ -467,7 +467,7 @@ export const createAccountConnectLink = async (req, res) => {
  * This function creates a account for the customer to connect.
  * @param {express.Request} req - The incoming request object.
  * @param {express.Response} res - The outgoing response object.
- * @returns {Promise<Response>} - A Promise that resolves to the response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createAccount = async (req, res) => {
   try {
@@ -494,9 +494,9 @@ export const createAccount = async (req, res) => {
 /**
  * Creates a PaymentIntent for a customer.
  *
- * @param {express.Request} req
- * @param {express.Response} res
- * @returns {Promise<express.Response>}
+ * @param {express.Request} req - The incoming request object.
+ * @param {express.Response} res - The outgoing response object.
+ * @returns {Promise<express.Response>} - A Promise that resolves to the response object.
  */
 export const createPaymentIntent = async (req, res) => {
   try {
